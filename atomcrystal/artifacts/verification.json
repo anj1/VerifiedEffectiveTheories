@@ -1,0 +1,13 @@
+{
+  "classification": "verification execution record; the Lean theorem is the scientific proof",
+  "toolchain": "Lean 4.34.1",
+  "build": {"command": "lake build", "exit_code": 0},
+  "independent_verifier": {"command": "lake env leanchecker VerifiedPhysics.Final.MainTheorem", "exit_code": 0},
+  "headline_theorem": "VerifiedPhysics.verified_cross_scale_maxwell_surface_prediction",
+  "headline_kernel_dependencies": ["propext", "Classical.choice", "Quot.sound"],
+  "certificate_kernel_dependencies": ["propext", "Classical.choice", "Quot.sound"],
+  "numeric_reproduction": "scripts/maxwell_slab.py reproduces artifacts/maxwell_refined_raw.json exactly",
+  "source_snapshot": "artifacts/source_revision.sha256",
+  "dependency_audit": "scripts/audit.py checks both prediction/test import separation and absence of project trust escapes",
+  "scope": "finite ionic-Maxwell linear response derived from the nonlinear potential; no claim about nonlinear periodic-orbit frequencies or measured NaCl"
+}

@@ -1,0 +1,11 @@
+# Repository-wide LF line endings preserve frozen research source hashes.
+* text=auto eol=lf
+*.lean text eol=lf
+*.py text eol=lf
+*.json text eol=lf
+*.md text eol=lf
+*.sha256 text eol=lf
+*.toml text eol=lf
+*.yml text eol=lf
+*.yaml text eol=lf
+lean-toolchain text eol=lf

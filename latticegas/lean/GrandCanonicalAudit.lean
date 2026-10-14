@@ -1,0 +1,35 @@
+import GrandCanonicalFinal
+
+#print axioms GrandCanonical.finite_spin_space
+#print axioms GrandCanonical.joint_spin_marginal
+#print axioms GrandCanonical.heatProb_mono
+#print axioms GrandCanonical.rational_threshold
+#print axioms GrandCanonical.update_mono
+#print axioms GrandCanonical.coalescence_certificate
+#print axioms GrandCanonical.cftp_stationary_of_stationary_coupling
+#print axioms GrandCanonical.binder_interval
+#print axioms GrandCanonical.binder_confidence_of_moment_cover
+#print axioms GrandCanonical.crossing_of_endpoint_signs
+#print axioms GrandCanonical.realMoment_continuous
+#print axioms GrandCanonical.realMoment_pos
+#print axioms GrandCanonical.finiteBinder_crossing_positive
+#print axioms GrandCanonical.isingBinder_crossing
+#print axioms GrandCanonical.local_disagreement_balance
+#print axioms GrandCanonical.concrete_heatProb_is_conditional
+#print axioms GrandCanonical.heatKernelSite_detailed_balance
+#print axioms GrandCanonical.heatKernelSite_stationary
+#print axioms GrandCanonical.expectation_log_derivative
+#print axioms GrandCanonical.expectedBinder_eq_realBinder
+#print axioms GrandCanonical.expectedBinder_covariance_slope
+#print axioms GrandCanonical.centered_binder_identity
+#print axioms GrandCanonical.centered_binder_ratio_lt
+#print axioms GrandCanonical.centered_binder_ratio_gt
+#print axioms GrandCanonical.binder_order_of_ratio_separator
+#print axioms GrandCanonical.centered_binder_interval
+#print axioms GrandCanonical.centered_binder_confidence_of_cover
+#print axioms GrandCanonical.finiteBinder_crossing_of_ratio_signs
+#print axioms GrandCanonical.finite_fourier_amplitude_bound
+#print axioms GrandCanonical.finite_mode_power_bound
+#print axioms GrandCanonical.positive_ratio_interval
+#print axioms GrandCanonical.two_scale_pseudocriticality_and_amplification
+#print axioms GrandCanonical.three_familywise_cover

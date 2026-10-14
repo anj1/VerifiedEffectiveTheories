@@ -1,0 +1,8 @@
+import VerifiedPhysics.Final.MainTheorem
+
+/-! Inspect the final theorem's actual kernel dependencies. -/
+#print axioms VerifiedPhysics.verified_cross_scale_maxwell_surface_prediction
+#print axioms VerifiedPhysics.MaxwellSlab.certified_root
+#print axioms VerifiedPhysics.verified_automated_surface_physics
+#print axioms VerifiedPhysics.verified_driven_ionic_maxwell_equations
+#print axioms VerifiedPhysics.GratingExperiment.resonant_interface_unique

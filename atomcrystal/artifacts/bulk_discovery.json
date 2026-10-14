@@ -1,0 +1,12 @@
+{
+  "classification": "empirical observation and hypothesis until checked by Lean",
+  "model": "VerifiedPhysics.Base.Model: masses 6, charges +/-3, reduced mass 3, spring 6",
+  "variable": "s = squared angular frequency, dimensionless",
+  "observable": "polarization / unit field",
+  "discovery": [["0", "3/2"], ["1/2", "2"], ["1", "3"], ["3/2", "6"]],
+  "withheld": [["9/4", "-12"], ["3", "-3"], ["7/2", "-2"], ["4", "-3/2"]],
+  "rejected": ["constant", "linear polynomial", "quadratic polynomial"],
+  "candidate": "chi(s) = (3/2)/(1-s/2) = 3/(2-s)",
+  "withheld_residual": "0 at all four listed points",
+  "formal_upgrade": "VerifiedPhysics.exact_bulk_dielectric_law, all nonnegative real s except 2"
+}

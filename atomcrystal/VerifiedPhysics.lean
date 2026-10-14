@@ -1,0 +1,6 @@
+import VerifiedPhysics.Final.MainTheorem
+import VerifiedPhysics.Bulk.NormalModes
+import VerifiedPhysics.Effective.FiniteSlabCorrection
+import VerifiedPhysics.Atomistic.NonlinearPotential
+import VerifiedPhysics.Effective.GratingProposal
+import VerifiedPhysics.Atomistic.AxialSlice

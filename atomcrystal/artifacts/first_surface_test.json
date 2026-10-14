@@ -1,0 +1,16 @@
+{
+  "classification": "failed hypothesis plus proposed certificate, checked separately in Lean",
+  "prediction_file": "artifacts/prediction.json",
+  "geometry": "two ionic layers, open terminating boundary, dimensionless",
+  "s_eff": "3",
+  "k2": "6",
+  "operator": [["4", "-2"], ["-2", "5"]],
+  "characteristic_polynomial": "t^2 - 9*t + 16",
+  "predicted_eigenvalue_residual": "-2",
+  "prediction_status": "rejected: predicted squared frequency is not a slab eigenvalue",
+  "first_root_sign_change_bracket": ["243/100", "61/25"],
+  "proposed_exact_first_root": "(9 - sqrt(17))/2",
+  "proposed_eigenvector": ["2", "(sqrt(17)-1)/2"],
+  "formal_rejection": "VerifiedPhysics.predicted_eigenvalue_rejected",
+  "formal_certification": "VerifiedPhysics.certified_slab_mode"
+}

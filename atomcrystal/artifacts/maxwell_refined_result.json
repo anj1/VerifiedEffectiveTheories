@@ -1,0 +1,23 @@
+{
+  "classification": "untrusted numerical observation; the broader enclosure is certified separately in Lean",
+  "prediction_file": "maxwell_refined_prediction.json",
+  "model_version": "finite-staggered-TM-v2",
+  "endpoint_determinant_signs": [1, -1],
+  "numerical_root_bracket": ["413813397441/137438953472", "165525358976403/54975581388800"],
+  "approximate_squared_frequency": 3.0108887399619833,
+  "characteristic_at_prediction": "9478430214006300568091497164227700033255165530904526848",
+  "certified_squared_frequency_interval": ["301/100", "753/250"],
+  "certified_stiffness_interval": ["1999999/1000000", "2000001/1000000"],
+  "certified_frequency_error": "0 < omega_micro-sqrt(3) <= 1/250",
+  "certified_localization": "At least 3/5 of magnetic-field energy within distance 1 of interface, in a finite box of half-width 2",
+  "formal_root": "VerifiedPhysics.MaxwellSlab.certified_root",
+  "formal_eigenmode": "VerifiedPhysics.MaxwellSlab.stencil_physical_eigenmode",
+  "formal_final": "VerifiedPhysics.verified_cross_scale_maxwell_surface_prediction",
+  "uncertainty": {
+    "arithmetic": "zero; all certificate inequalities are checked by Lean",
+    "microscopic_bias": "|a| <= 1/1000000000; exact Hessian derived from nonlinear pair potential",
+    "bulk_constitutive": "<= (3/1000000)*|E| for squared frequency in [3.01,3.012]",
+    "surface_combined": "frequency difference <= 1/250 uniformly over the whole microscopic Hessian interval",
+    "scope": "small oscillations about force-balanced equilibria; not finite-amplitude nonlinear periodic trajectories"
+  }
+}

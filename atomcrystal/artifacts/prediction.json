@@ -1,0 +1,13 @@
+{
+  "status": "frozen higher-level prediction",
+  "classification": "formal theorem of effective theory; slab calculation pending",
+  "model": "VerifiedPhysics.Effective.SurfaceMode",
+  "s_eff": "3",
+  "k2": "6",
+  "dielectric": "-2",
+  "reststrahlen_domain": "2 < s < 5",
+  "expected_slab_squared_frequency_interval": ["3", "3"],
+  "expected_field_behavior": "positive evanescence rates on both sides of interface",
+  "formal_prediction": "VerifiedPhysics.predicted_surface_mode",
+  "source": "bulk dielectric theorem and planar TM boundary equations"
+}

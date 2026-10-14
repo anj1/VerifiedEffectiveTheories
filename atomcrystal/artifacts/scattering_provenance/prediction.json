@@ -1,0 +1,18 @@
+{
+  "stage": "prediction",
+  "recorded_utc": "2026-10-14T01:23:30.256607+00:00",
+  "sha256": {
+    "VerifiedPhysics/Atomistic/LinearDynamics.lean": "8e6dd7ffa0736fa54349cbabc05ce621a925291f98e035ab086269abc3464516",
+    "VerifiedPhysics/Base/Model.lean": "f52087366cca18b026b7efc7fe581566e2908cfe7f6c707fb293a482346653ec",
+    "VerifiedPhysics/Bulk/DielectricLaw.lean": "cdf7ee12b68e3289394e33dc51433c3e077f8518ab054312154d8a0410fbc899",
+    "VerifiedPhysics/Effective/GratingProposal.lean": "1025c1c3bdd0da468de29467c72508c2dee11f9d3ecb631bb8f9cd2f0e519879",
+    "VerifiedPhysics/Effective/MaxwellPrediction.lean": "27153e28db9ec073747022c13b3fe7dc5f9aeafd5e868dd6b52539ee4951b62c",
+    "VerifiedPhysics/Effective/SurfaceMode.lean": "cf973616856a1cc76e4f5ef32e81ec1f1c056a962811d1ac381bc91ac620efc9",
+    "VerifiedPhysics/Effective/TMFields.lean": "a2054930928f09217bb3a0bb83bbac88b26059683df33eda6881f3a6b673953c",
+    "VerifiedPhysics/Prediction/FrozenScatteringPrediction.lean": "55386826f459e8d4b5a2db60b30024f544a1dae0b4d46ada0aa7ed2625301ca7",
+    "VerifiedPhysics/Prediction/GratingDesign.lean": "8fc8c084c6949a54162a5701e0762d276621d77bbd06759c5c7b40c94c820ca5",
+    "VerifiedPhysics/Prediction/SurfaceMomentum.lean": "57a9b76b7f3f417234cfde4f1155b035eea9fb0c7c5acd2d2ef1da4d3e9443b8",
+    "artifacts/scattering_design.json": "b13bf27755c6069dfb58ee5c279816e43379d7f9da4657a44bf8d6e9f9e6ff8e",
+    "artifacts/scattering_provenance/baseline.json": "d5342cd5d38b7c442de7ae357f125a22127a75325c83b87e7cee83712be55206"
+  }
+}

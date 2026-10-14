@@ -1,0 +1,19 @@
+{
+  "commands": [
+    "lake build",
+    "lake env leanchecker VerifiedPhysics.Final.MainTheorem",
+    "lake build VerifiedPhysics.Final.Audit",
+    "python3 scripts/scattering.py --check",
+    "python3 scripts/scattering_provenance.py verify"
+  ],
+  "execution": "Commands executed sequentially with &&; aggregate exit status zero. Independent checker is silent on success.",
+  "aggregate_exit_code": 0,
+  "toolchain": "leanprover/lean4:v4.34.1",
+  "output": "✔ [8960/8962] Built VerifiedPhysics.Final.MainTheorem (9.6s)\n✔ [8961/8962] Built VerifiedPhysics (3.4s)\nBuild completed successfully (8962 jobs).\nℹ [8961/8961] Built VerifiedPhysics.Final.Audit (3.4s)\ninfo: VerifiedPhysics/Final/Audit.lean:4:0: 'VerifiedPhysics.verified_cross_scale_maxwell_surface_prediction' depends on axioms: [propext,\n Classical.choice,\n Quot.sound]\ninfo: VerifiedPhysics/Final/Audit.lean:5:0: 'VerifiedPhysics.MaxwellSlab.certified_root' depends on axioms: [propext, Classical.choice, Quot.sound]\ninfo: VerifiedPhysics/Final/Audit.lean:6:0: 'VerifiedPhysics.verified_automated_surface_physics' depends on axioms: [propext, Classical.choice, Quot.sound]\ninfo: VerifiedPhysics/Final/Audit.lean:7:0: 'VerifiedPhysics.verified_driven_ionic_maxwell_equations' depends on axioms: [propext, Classical.choice, Quot.sound]\ninfo: VerifiedPhysics/Final/Audit.lean:8:0: 'VerifiedPhysics.GratingExperiment.resonant_interface_unique' depends on axioms: [propext, Classical.choice, Quot.sound]\nBuild completed successfully (8961 jobs).\n{\n  \"resonant\": {\n    \"s\": \"3\",\n    \"interface_intensity_approx\": 26.68587474454451,\n    \"near_interface_fraction_approx\": 0.9738604919111297\n  },\n  \"control\": {\n    \"s\": \"4\",\n    \"interface_intensity_approx\": 0.0008278367509233476,\n    \"near_interface_fraction_approx\": 0.9585327960296011\n  }\n}\nbaseline.json: 32 identities verified\nprediction.json: 12 identities verified\n",
+  "standard_axioms": [
+    "propext",
+    "Classical.choice",
+    "Quot.sound"
+  ],
+  "note": "This log precedes the final result snapshot. The final three-stage hash/import audit is reproduced separately with python3 scripts/audit.py."
+}

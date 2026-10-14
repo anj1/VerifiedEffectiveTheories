@@ -1,0 +1,16 @@
+{
+  "classification": "hypothesis: frozen before the refined lower-level calculation",
+  "model_version": "finite-staggered-TM-v2",
+  "s_eff": "3",
+  "k2": "6",
+  "predicted_squared_frequency_interval": ["297/100", "303/100"],
+  "vacuum_cells": 16,
+  "material_cells": 16,
+  "spacing": "1/8",
+  "outer_boundary": "zero tangential electric field at both outer faces, distance 2 from the interface",
+  "interface_edge": "half material filling, ionic oscillator strength 3/2",
+  "material_edges": "ionic oscillator strength 3",
+  "bulk_stiffness_interval": ["1999999/1000000", "2000001/1000000"],
+  "rationale": "Refine spatial discretization after the retained v1 failure while keeping physical extent and the original +/-0.03 prediction budget.",
+  "provenance": "Written before evaluating the v2 operator. Mathematical dependency separation is checked in Lean; chronology is recorded by this workflow."
+}

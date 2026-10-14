@@ -1,0 +1,12 @@
+{
+  "status": "frozen higher-level refined prediction",
+  "classification": "formal theorem of corrected finite-slab effective theory; withheld slab calculation pending",
+  "derivation": "VerifiedPhysics.corrected_mode_from_lower_level, proved for all positive k2 from the first slab operator family",
+  "prediction_theorem": "VerifiedPhysics.refined_prediction_interval",
+  "new_k2": "12",
+  "predicted_squared_frequency_expression": "7 - sqrt(17)",
+  "predicted_squared_frequency_interval": ["287/100", "288/100"],
+  "predicted_surface_layer_fraction_at_least": "3/5",
+  "previously_tested_k2": "6",
+  "lower_level_test_status": "not run when this record was created"
+}

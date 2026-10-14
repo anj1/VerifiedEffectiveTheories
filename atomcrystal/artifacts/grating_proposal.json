@@ -1,0 +1,9 @@
+{
+  "classification": "formal effective-theory proposal; lower-level scattering result absent",
+  "effective_mode": "s=3, k_parallel=sqrt(6), epsilon=-2",
+  "far_field_limit": "|sin(theta)| <= 1 gives |k_parallel| <= sqrt(3)",
+  "proposal": "normal incidence, diffraction order m=1, G=sqrt(6), period Lambda=2*pi/sqrt(6)",
+  "formal_checks": ["direct_far_field_cannot_match", "proposed_grating_phase_matching"],
+  "lower_level_atomistic_grating_experiment": "not constructed",
+  "scattering_resonance_claim": "hypothesis only"
+}

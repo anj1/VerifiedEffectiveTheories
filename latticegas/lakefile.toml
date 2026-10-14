@@ -1,0 +1,35 @@
+name = "physlib-experiments"
+version = "0.1.0"
+defaultTargets = ["LatticeGas", "LatticeGasStats", "LatticeGasScattering", "LatticeGasNumerics", "GrandCanonical", "GrandCanonicalPRG", "GrandCanonicalFinal"]
+
+[[require]]
+name = "Physlib"
+path = "vendor/physlib"
+
+[[lean_lib]]
+name = "LatticeGas"
+srcDir = "lean"
+
+[[lean_lib]]
+name = "LatticeGasStats"
+srcDir = "lean"
+
+[[lean_lib]]
+name = "LatticeGasScattering"
+srcDir = "lean"
+
+[[lean_lib]]
+name = "LatticeGasNumerics"
+srcDir = "lean"
+
+[[lean_lib]]
+name = "GrandCanonical"
+srcDir = "lean"
+
+[[lean_lib]]
+name = "GrandCanonicalPRG"
+srcDir = "lean"
+
+[[lean_lib]]
+name = "GrandCanonicalFinal"
+srcDir = "lean"

@@ -1,0 +1,13 @@
+{
+  "classification": "untrusted lower-level certificate proposal, checked by independent Lean proof",
+  "prediction_file": "artifacts/refined_prediction.json",
+  "new_k2": "12",
+  "operator": [["6", "-4"], ["-4", "8"]],
+  "characteristic_polynomial": "t^2 - 14*t + 32",
+  "frozen_interval": ["287/100", "288/100"],
+  "characteristic_at_lower_endpoint": "569/10000",
+  "characteristic_at_upper_endpoint": "-16/625",
+  "first_root_bracketed": true,
+  "exact_lower_level_eigenpair": ["7-sqrt(17)", "(2,(sqrt(17)-1)/2)"],
+  "formal_check": "VerifiedPhysics.withheld_slab_eigenpair"
+}

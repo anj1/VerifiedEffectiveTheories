@@ -1,0 +1,16 @@
+{
+  "classification": "hypothesis: preregistered effective prediction awaiting a lower-level Maxwell-ion test",
+  "model_version": "finite-staggered-TM-v1",
+  "s_eff": "3",
+  "k2": "6",
+  "predicted_squared_frequency_interval": ["297/100", "303/100"],
+  "vacuum_cells": 8,
+  "material_cells": 8,
+  "spacing": "1/4",
+  "outer_boundary": "zero tangential electric field at both finite outer faces",
+  "interface_edge": "half material filling, ionic oscillator strength 3/2",
+  "material_edges": "ionic oscillator strength 3; mass-normalized stiffness b=2",
+  "units": "dimensionless as in Base/Model.lean",
+  "provenance": "Written before the first run of scripts/maxwell_slab.py; chronological order is an execution record, not a Lean proposition",
+  "uncertainty": "The +/-3/100 squared-frequency budget is a candidate, not yet a derived estimate"
+}

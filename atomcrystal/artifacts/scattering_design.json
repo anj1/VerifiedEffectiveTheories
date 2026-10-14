@@ -1,0 +1,19 @@
+{
+  "stage": "prediction before driven calculation",
+  "model": "zero-bias 32-cell ionic-Maxwell slab; 32 polar dimers (64 ions), 63 electric amplitudes",
+  "selection_rule": "normal incidence and smallest positive diffraction order matching continuum k=sqrt(6)",
+  "candidates_rejected_before_test": ["direct vacuum illumination: insufficient parallel momentum", "passive grating reflectivity: requires radiative channels absent from the closed finite model"],
+  "coupler": "ideal prescribed magnetic source sheet, cos(sqrt(6)*x), at vacuum cell 15; unit forcing in CE-sH; all other rows zero",
+  "period": "2*pi/sqrt(6)",
+  "angle": "0",
+  "order": 1,
+  "bias": "0",
+  "squared_drive_frequency": "3",
+  "squared_control_frequency": "4",
+  "predicted_squared_resonance_window": ["297/100", "303/100"],
+  "falsifiable_observable": "H_vacuum(15)^2 + H_material(15)^2 under identical unit generalized sheet forcing",
+  "predicted_minimum_drive_intensity": "1",
+  "predicted_minimum_drive_to_control_intensity_ratio": "4",
+  "interpretation": "finite driven-response surface-field enhancement; not reflectivity, open-boundary scattering, or passive grating efficiency",
+  "uncertainty": {"bulk_at_zero_bias": "0", "continuum_algebra": "0", "finite_slab_squared_frequency_allowance": "3/100", "ideal_momentum": "0", "certificate_arithmetic": "0"}
+}

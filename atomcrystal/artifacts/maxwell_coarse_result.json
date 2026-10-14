@@ -1,0 +1,9 @@
+{
+  "classification": "empirical observation; not yet a Lean certificate",
+  "model_version": "finite-staggered-TM-v1",
+  "prediction_file": "maxwell_prediction.json",
+  "endpoint_determinant_signs": [1, 1],
+  "candidate_surface_root_bracket": ["76/25", "61/20"],
+  "finding": "The candidate surface root is outside the preregistered [2.97,3.03] interval. Equal endpoint signs alone do not prove absence of every root inside that interval.",
+  "retained_failure": "The initial numerical test did not validate the proposed error budget. The next experiment changes spatial resolution explicitly."
+}
