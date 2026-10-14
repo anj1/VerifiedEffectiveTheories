@@ -10,6 +10,8 @@ and data-retention scopes.
 
 ## Atomcrystal: microscopic ions to surface-field enhancement
 
+![From microscopic polar dimers to a momentum-matched, Lean-verified surface response](atomcrystal/assets/verified_surface_physics.svg)
+
 [`atomcrystal/`](atomcrystal/README.md) completes a finite-model research loop:
 
 ```text
