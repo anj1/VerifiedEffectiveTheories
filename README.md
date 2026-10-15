@@ -5,9 +5,9 @@ You could in principle avoid experiments and derive everything from first princi
 
 This repo explores an alternative way: Building up effective theories instead. The procedure is: start from a low level of theory, construct systems of manageable size, derive laws, and then renormalize to a larger scale (abstracting away details) and see how the laws translate over. The key "trick" is you do the whole thing with Lean, so you know exactly what assumptions you're making at each step and can prove that your macroscopic law actually does work in the regime you're interested in.
 
-So then physics research basically becomes math research: you can state laws (conjectures), try to prove them, or find counterexamples (novel phenomena, anomalous observations).
+So then theoretical physics research basically becomes math research: you can state laws (conjectures), try to prove them, or find counterexamples (novel phenomena, anomalous observations).
 
-An important caveat is that things are only proven relative to the core postulates (axioms). You can in principle go quite deep, deriving from quantum field theory, so in practice this is really just a limit of computation and number of tokens. Also, most interesting physics happens at the level of the effective theory.
+An important caveat is that things are only proven relative to the core postulates (axioms). You can in principle go quite deep, deriving from quantum field theory, with the downside being a more complex problem to solve. But more importantly, most interesting physics happens at the level of the effective theory.
 
 The following is an AI-generated description of the results of these experiments so far.
 
