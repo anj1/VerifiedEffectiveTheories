@@ -1,6 +1,8 @@
 # Physics research experiments
 
-Usual physics research involves setting up real-world experiments but they're expensive and time-consuming and take a long time to do and interpret.
+AI has recently had some [amazing](https://openai.com/index/navier-stokes-solution/) [results](https://github.com/openai/math) in mathematics. This opens up the question of whether we might be able to use AI in physics to achieve breakthroughs of similar scales. There are currently many problems in physics that have remained unsolved despite decades of study, like ambient-pressure room-temperature superconductors, or controlled nuclear fusion. 
+
+At first glance it might look like math and physics are very different; ai uses formal verification tools (like Lean) that can run entirely inside a computer. Usual physics research involves setting up real-world experiments but they're expensive and time-consuming and take a long time to do and interpret.
 You could in principle avoid experiments and derive everything from first principles (quantum mechanics, quantum field theory) but for any macroscopic system it's basically infeasible.
 
 This repo explores an alternative way: Building up effective theories instead. The procedure is: start from a low level of theory, construct systems of manageable size, derive laws, and then renormalize to a larger scale (abstracting away details) and see how the laws translate over. The key "trick" is you do the whole thing with Lean, so you know exactly what assumptions you're making at each step and can prove that your macroscopic law actually does work in the regime you're interested in.
