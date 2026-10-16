@@ -1,6 +1,6 @@
 # Physics research experiments
 
-AI has recently had some [amazing](https://openai.com/index/navier-stokes-solution/) [results](https://github.com/openai/math) in mathematics. This opens up the question of whether we might be able to use AI in physics to achieve breakthroughs of similar scales. There are currently many problems in physics that have remained unsolved despite decades of study, like ambient-pressure room-temperature superconductors, or controlled nuclear fusion. 
+AI has recently had some [amazing](https://openai.com/index/navier-stokes-solution/) [results](https://github.com/openai/math) in mathematics. This opens up the question of whether we might be able to use AI in physics to achieve breakthroughs of similar magnitudes. There are currently many problems in physics that have remained unsolved despite decades of study, in for instance materials science and plasma physics.
 
 At first glance it might look like math and physics are very different; ai uses formal verification tools (like Lean) that can run entirely inside a computer. Usual physics research involves setting up real-world experiments but they're expensive and time-consuming and take a long time to do and interpret.
 You could in principle avoid experiments and derive everything from first principles (quantum mechanics, quantum field theory) but for any macroscopic system it's basically infeasible.
