@@ -1,0 +1,13 @@
+{
+  "Grain/Energy.lean": "bf432c8769727324500f42c88a606b0ac59fb2171800f3d81a92451a0c898f0e",
+  "Grain/Schur.lean": "3f39c075883c378d6b7dccc4f78a4e5e07ce122f5a7225c64c81a34058b89550",
+  "Grain/ShellCertificate.lean": "87ba5f3066dfbf9965eee3db24907085a2f240d14baf9d48bdabe4131a4dcdf7",
+  "Grain/ShellPrediction.lean": "2e725d5a664ff3a40ff6ee622f0031553871336d690d2c864fe41e44c1d8dfd3",
+  "Grain/ShellPredictionData.lean": "54a4d67cdae0f82be98a5cdef6afd34ab3ef776877f3b4fb7043151ddc1b3235",
+  "Grain/TwoShell.lean": "b2e3dc865a999157b91726a2fdaa737f5109c4ea54580a7550d657e2465985a7",
+  "artifacts/two_shell_prediction.json": "05097727dc99b95bedc18aaa0d7561cbe62376b29796b06141aac8e0e0a4e89c",
+  "lake-manifest.json": "d2adf495bbd5f3feafefee6caa74401150de128cdcc8db40b1e567d8299413b1",
+  "lakefile.toml": "18813b055e73eb388543ce25077d6bf96190a33322289abfd724911576e04d71",
+  "lean-toolchain": "ca5f1f601d34c49079e38d7e7041eb0f2a9c227fbc1df0f404820069a052330c",
+  "scripts/two_shell_prediction.py": "d01ad308ef2964d04687de2432368deba6c0f55bf1ff4523b17116283af5f578"
+}

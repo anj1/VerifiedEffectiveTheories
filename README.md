@@ -15,7 +15,7 @@ The following is an AI-generated description of the results of these experiments
 
 ## Experiments
 
-This repository contains two separate projects with different verification
+This repository contains three separate projects with different verification
 and data-retention scopes.
 
 ## Atomcrystal: microscopic ions to surface-field enhancement
@@ -68,6 +68,19 @@ New simulations do not restore the deleted historical samples.
 See the [project README](latticegas/README.md) for dependency setup and rerun
 instructions, and the [report index](latticegas/reports/README.md) for the
 findings and their limitations.
+
+## Superconductivity: shell dependence of the parity energy
+
+[`superconductivity/`](superconductivity/README.md) tests a finite-grain
+renormalization prediction at fixed bare pairing strength. A certified
+effective model predicts that moving the outer orbitals away from the Fermi
+level reduces the odd–even ground-energy difference. The verified Schur
+reduction derives the prediction window from the discarded occupation
+energies and couplings. Independently generated rational certificates for
+both full occupation Hamiltonians place the contrast inside that window.
+The central-orbital bare model predicts zero contrast.
+[Headline theorem](superconductivity/Grain/Main.lean) ·
+[Reproduction commands](superconductivity/README.md#reproduce)
 
 ## Verify atomcrystal
 

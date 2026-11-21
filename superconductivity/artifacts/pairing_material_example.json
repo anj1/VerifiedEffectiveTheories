@@ -1,0 +1,34 @@
+{
+  "fermi_halfwidth_mev": "5",
+  "patches": [
+    [
+      {"xi_mev": ["-1/2", "1/2"], "quadrature_weight": "0.012"},
+      {"xi_mev": ["4.99", "5.01"], "quadrature_weight": "0.00002"},
+      {"xi_mev": ["6", "6.01"], "quadrature_weight": "0.001"}
+    ],
+    [
+      {"xi_mev": ["-0.6", "-0.4"], "quadrature_weight": "0.008"},
+      {"xi_mev": ["-5.01", "-4.99"], "quadrature_weight": "0.00001"}
+    ]
+  ],
+  "transitions": [
+    {
+      "patches": [0, 0],
+      "coulomb_mev": ["129.9", "130.1"],
+      "modes": [{"energy_mev": ["11.99", "12.01"], "vertex_sq_mev2": ["7499", "7501"]}]
+    },
+    {
+      "patches": [0, 1],
+      "coulomb_mev": ["109.9", "110.1"],
+      "modes": [
+        {"energy_mev": ["9.99", "10.01"], "vertex_sq_mev2": ["279", "281"]},
+        {"energy_mev": ["16.99", "17.01"], "vertex_sq_mev2": ["499", "501"]}
+      ]
+    },
+    {
+      "patches": [1, 1],
+      "coulomb_mev": ["139.9", "140.1"],
+      "modes": [{"energy_mev": ["15.99", "16.01"], "vertex_sq_mev2": ["5599", "5601"]}]
+    }
+  ]
+}

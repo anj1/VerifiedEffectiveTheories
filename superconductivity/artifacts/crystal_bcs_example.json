@@ -1,0 +1,7 @@
+{
+  "hopping_by_displacement_mev": [1, "-1/2", "-1/4", "-1/8"],
+  "stiffness_mev_per_angstrom2": 2,
+  "deformation_mev_per_angstrom": 2,
+  "screened_onsite_repulsion_mev": "1/2",
+  "chemical_potential_mev": 0
+}

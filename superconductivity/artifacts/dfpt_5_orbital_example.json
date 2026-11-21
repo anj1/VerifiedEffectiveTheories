@@ -1,0 +1,72 @@
+{
+  "description": "Synthetic normal-mode response with a prescribed shell displacement. Energies have d = 1 meV.",
+  "odd_electrons": 5,
+  "active_orbitals": 3,
+  "energy_resolution_mev": "1/10000000000000",
+  "contrast_weights": {
+    "r3": 1,
+    "r9": -1
+  },
+  "cases": {
+    "r3": {
+      "levels_mev": [
+        -3,
+        -1,
+        0,
+        1,
+        3
+      ],
+      "screening_convention": "Synthetic DFPT fixture. No screened Coulomb interaction or excluded polarization.",
+      "screened_density_terms": [],
+      "screened_scattering_terms": [],
+      "upstream_sector_error_mev": 0,
+      "mass_weighted_modes": [
+        {"omega_squared_mev2": 100000000000000000000000000000, "potential_derivative": [[0, 1, 10000000000000]]},
+        {"omega_squared_mev2": 100000000000000000000000000000, "potential_derivative": [[0, 2, 10000000000000]]},
+        {"omega_squared_mev2": 100000000000000000000000000000, "potential_derivative": [[0, 3, 10000000000000]]},
+        {"omega_squared_mev2": 100000000000000000000000000000, "potential_derivative": [[0, 4, 10000000000000]]},
+        {"omega_squared_mev2": 100000000000000000000000000000, "potential_derivative": [[1, 2, 10000000000000]]},
+        {"omega_squared_mev2": 100000000000000000000000000000, "potential_derivative": [[1, 3, 10000000000000]]},
+        {"omega_squared_mev2": 100000000000000000000000000000, "potential_derivative": [[1, 4, 10000000000000]]},
+        {"omega_squared_mev2": 100000000000000000000000000000, "potential_derivative": [[2, 3, 10000000000000]]},
+        {"omega_squared_mev2": 100000000000000000000000000000, "potential_derivative": [[2, 4, 10000000000000]]},
+        {"omega_squared_mev2": 100000000000000000000000000000, "potential_derivative": [[3, 4, 10000000000000]]},
+        {"omega_squared_mev2": 100000000000000000000000000000, "potential_derivative": [[0, 0, 10000000000000]]},
+        {"omega_squared_mev2": 100000000000000000000000000000, "potential_derivative": [[1, 1, 10000000000000]]},
+        {"omega_squared_mev2": 100000000000000000000000000000, "potential_derivative": [[2, 2, 10000000000000]]},
+        {"omega_squared_mev2": 100000000000000000000000000000, "potential_derivative": [[3, 3, 10000000000000]]},
+        {"omega_squared_mev2": 100000000000000000000000000000, "potential_derivative": [[4, 4, 10000000000000]]}
+      ]
+    },
+    "r9": {
+      "levels_mev": [
+        -9,
+        -1,
+        0,
+        1,
+        9
+      ],
+      "screening_convention": "Synthetic DFPT fixture. No screened Coulomb interaction or excluded polarization.",
+      "screened_density_terms": [],
+      "screened_scattering_terms": [],
+      "upstream_sector_error_mev": 0,
+      "mass_weighted_modes": [
+        {"omega_squared_mev2": 100000000000000000000000000000, "potential_derivative": [[0, 1, 10000000000000]]},
+        {"omega_squared_mev2": 100000000000000000000000000000, "potential_derivative": [[0, 2, 10000000000000]]},
+        {"omega_squared_mev2": 100000000000000000000000000000, "potential_derivative": [[0, 3, 10000000000000]]},
+        {"omega_squared_mev2": 100000000000000000000000000000, "potential_derivative": [[0, 4, 10000000000000]]},
+        {"omega_squared_mev2": 100000000000000000000000000000, "potential_derivative": [[1, 2, 10000000000000]]},
+        {"omega_squared_mev2": 100000000000000000000000000000, "potential_derivative": [[1, 3, 10000000000000]]},
+        {"omega_squared_mev2": 100000000000000000000000000000, "potential_derivative": [[1, 4, 10000000000000]]},
+        {"omega_squared_mev2": 100000000000000000000000000000, "potential_derivative": [[2, 3, 10000000000000]]},
+        {"omega_squared_mev2": 100000000000000000000000000000, "potential_derivative": [[2, 4, 10000000000000]]},
+        {"omega_squared_mev2": 100000000000000000000000000000, "potential_derivative": [[3, 4, 10000000000000]]},
+        {"omega_squared_mev2": 100000000000000000000000000000, "potential_derivative": [[0, 0, 10000000000000]]},
+        {"omega_squared_mev2": 100000000000000000000000000000, "potential_derivative": [[1, 1, 10000000000000]]},
+        {"omega_squared_mev2": 100000000000000000000000000000, "potential_derivative": [[2, 2, 10000000000000]]},
+        {"omega_squared_mev2": 100000000000000000000000000000, "potential_derivative": [[3, 3, 10000000000000]]},
+        {"omega_squared_mev2": 100000000000000000000000000000, "potential_derivative": [[4, 4, 10000000000000]]}
+      ]
+    }
+  }
+}

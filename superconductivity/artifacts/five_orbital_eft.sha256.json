@@ -1,0 +1,13 @@
+{
+  "Grain/Design.lean": "ee04cc1103bf2de6beeb5b5cf81e3b34cf3edd570778c87525ae476e1966cc1a",
+  "Grain/Effective.lean": "f77429f2e3126868ee5dede044951e20d11694b60b9011b873170d1cc6a29ac7",
+  "Grain/Energy.lean": "bf432c8769727324500f42c88a606b0ac59fb2171800f3d81a92451a0c898f0e",
+  "Grain/Model.lean": "11fbce570068dd0b574f87b0bf1e78f2213a72e52eb6a46e23e1b388859e1fb1",
+  "Grain/ParityCancellation.lean": "41eb60c29d5dbfc500765cd0c61616fbf33a00948b52c0c01906e2fe71aa1911",
+  "Grain/Prediction.lean": "ee83f2624fcaaec715f37ed692843b80cc0b2bc7e26757bcd90662358edbe5b5",
+  "Grain/RankOne.lean": "480696dcda3db833c7884d22823ce23d0f856f83900c7f4094085d17e0949b9b",
+  "artifacts/design.json": "4a923df1f072eba483173f4d6c8f3dcb3f8f8be9b084140cf61e51967b8692e6",
+  "lake-manifest.json": "d2adf495bbd5f3feafefee6caa74401150de128cdcc8db40b1e567d8299413b1",
+  "lakefile.toml": "18813b055e73eb388543ce25077d6bf96190a33322289abfd724911576e04d71",
+  "lean-toolchain": "ca5f1f601d34c49079e38d7e7041eb0f2a9c227fbc1df0f404820069a052330c"
+}

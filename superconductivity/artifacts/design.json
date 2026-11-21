@@ -1,0 +1,17 @@
+{
+  "energy_unit_in_central_level_spacings": "1/1000",
+  "coupling": 1,
+  "central_levels": [-1000, 0, 1000],
+  "outer_shell_candidates": [3000, 9000],
+  "spectra": {
+    "near": [-3000, -1000, 0, 1000, 3000],
+    "far": [-9000, -1000, 0, 1000, 9000]
+  },
+  "electron_numbers": [4, 5, 6],
+  "selection_rule": "Keep the central spacing and bare coupling fixed. Within the two declared candidate shell radii, select the closest and farthest radii to maximize the positive second-order near-minus-far contrast.",
+  "second_order_near_minus_far": "1/9000",
+  "absolute_sector_error": "1/100000",
+  "acceptance_interval": ["4/56250", "17/112500"],
+  "positive_control": "near parity minus far parity lies in the frozen interval",
+  "bare_control": "near parity minus far parity = 0 for the central orbital with frozen outer occupations"
+}

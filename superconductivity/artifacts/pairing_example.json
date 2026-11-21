@@ -1,0 +1,23 @@
+{
+  "patch_weights_per_mev": ["0.0012", "0.0008"],
+  "transitions": [
+    {
+      "patches": [0, 0],
+      "coulomb_mev": "130",
+      "modes": [{"energy_mev": "12", "vertex_sq_mev2": "7500"}]
+    },
+    {
+      "patches": [0, 1],
+      "coulomb_mev": "110",
+      "modes": [
+        {"energy_mev": "10", "vertex_sq_mev2": "280"},
+        {"energy_mev": "17", "vertex_sq_mev2": "500"}
+      ]
+    },
+    {
+      "patches": [1, 1],
+      "coulomb_mev": "140",
+      "modes": [{"energy_mev": "16", "vertex_sq_mev2": "5600"}]
+    }
+  ]
+}

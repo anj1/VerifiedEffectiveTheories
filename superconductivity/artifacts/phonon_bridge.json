@@ -1,0 +1,184 @@
+{
+  "phonon_frequency": 50000000000000,
+  "vertex_over_frequency": "1/100000000",
+  "bond_modes": 21,
+  "density_modes": 7,
+  "cases": [
+    {
+      "r": 2,
+      "s": 6,
+      "sectors": {
+        "6": {
+          "spinful_dimension": 3003,
+          "active_dimensions": [
+            35
+          ],
+          "electronic_offset": "-3/20",
+          "complement_lower": "-431/25",
+          "electronic_lo": "-18180186681044160353/1000000000000000000",
+          "electronic_hi": "-568130833782630011/31250000000000000",
+          "microscopic_lo": "-18180186681044160353/1000000000000000000",
+          "microscopic_hi": "-454504667026103676941/25000000000000000000"
+        },
+        "7": {
+          "spinful_dimension": 3432,
+          "active_dimensions": [
+            20,
+            20
+          ],
+          "electronic_offset": "-31/200",
+          "complement_lower": "-691/40",
+          "electronic_lo": "-18185102269669130199/1000000000000000000",
+          "electronic_hi": "-9092551134834565099/500000000000000000",
+          "microscopic_lo": "-18185102269669130199/1000000000000000000",
+          "microscopic_hi": "-909255113483455844707/50000000000000000000"
+        },
+        "8": {
+          "spinful_dimension": 3003,
+          "active_dimensions": [
+            35
+          ],
+          "electronic_offset": "-4/25",
+          "complement_lower": "-863/50",
+          "electronic_lo": "-18200186681044160353/1000000000000000000",
+          "electronic_hi": "-568755833782630011/31250000000000000",
+          "microscopic_lo": "-18200186681044160353/1000000000000000000",
+          "microscopic_hi": "-910009334052207346267/50000000000000000000"
+        }
+      }
+    },
+    {
+      "r": 2,
+      "s": 14,
+      "sectors": {
+        "6": {
+          "spinful_dimension": 3003,
+          "active_dimensions": [
+            35
+          ],
+          "electronic_offset": "-3/20",
+          "complement_lower": "-831/25",
+          "electronic_lo": "-17090082692896884117/500000000000000000",
+          "electronic_hi": "-34180165385793768233/1000000000000000000",
+          "microscopic_lo": "-17090082692896884117/500000000000000000",
+          "microscopic_hi": "-1709008269289687187963/50000000000000000000"
+        },
+        "7": {
+          "spinful_dimension": 3432,
+          "active_dimensions": [
+            20,
+            20
+          ],
+          "electronic_offset": "-31/200",
+          "complement_lower": "-1331/40",
+          "electronic_lo": "-34185085887443456397/1000000000000000000",
+          "electronic_hi": "-8546271471860864099/250000000000000000",
+          "microscopic_lo": "-34185085887443456397/1000000000000000000",
+          "microscopic_hi": "-213656786796521449329/6250000000000000000"
+        },
+        "8": {
+          "spinful_dimension": 3003,
+          "active_dimensions": [
+            35
+          ],
+          "electronic_offset": "-4/25",
+          "complement_lower": "-1663/50",
+          "electronic_lo": "-17100082692896884117/500000000000000000",
+          "electronic_hi": "-34200165385793768233/1000000000000000000",
+          "microscopic_lo": "-17100082692896884117/500000000000000000",
+          "microscopic_hi": "-34200165385793743607/1000000000000000000"
+        }
+      }
+    },
+    {
+      "r": 5,
+      "s": 6,
+      "sectors": {
+        "6": {
+          "spinful_dimension": 3003,
+          "active_dimensions": [
+            35
+          ],
+          "electronic_offset": "-3/20",
+          "complement_lower": "-581/25",
+          "electronic_lo": "-24180143465827634497/1000000000000000000",
+          "electronic_hi": "-377814741653556789/15625000000000000",
+          "microscopic_lo": "-24180143465827634497/1000000000000000000",
+          "microscopic_hi": "-2418014346582761702199/100000000000000000000"
+        },
+        "7": {
+          "spinful_dimension": 3432,
+          "active_dimensions": [
+            20,
+            20
+          ],
+          "electronic_offset": "-31/200",
+          "complement_lower": "-931/40",
+          "electronic_lo": "-24185074462483093109/1000000000000000000",
+          "electronic_hi": "-6046268615620773277/250000000000000000",
+          "microscopic_lo": "-24185074462483093109/1000000000000000000",
+          "microscopic_hi": "-1209253723124153780253/50000000000000000000"
+        },
+        "8": {
+          "spinful_dimension": 3003,
+          "active_dimensions": [
+            35
+          ],
+          "electronic_offset": "-4/25",
+          "complement_lower": "-1163/50",
+          "electronic_lo": "-24200143465827634497/1000000000000000000",
+          "electronic_hi": "-378127241653556789/15625000000000000",
+          "microscopic_lo": "-24200143465827634497/1000000000000000000",
+          "microscopic_hi": "-37812724165355651359/1562500000000000000"
+        }
+      }
+    },
+    {
+      "r": 5,
+      "s": 14,
+      "sectors": {
+        "6": {
+          "spinful_dimension": 3003,
+          "active_dimensions": [
+            35
+          ],
+          "electronic_offset": "-3/20",
+          "complement_lower": "-981/25",
+          "electronic_lo": "-20090062334309096113/500000000000000000",
+          "electronic_hi": "-1607204986744727689/40000000000000000",
+          "microscopic_lo": "-20090062334309096113/500000000000000000",
+          "microscopic_hi": "-1004503116715454088793/25000000000000000000"
+        },
+        "7": {
+          "spinful_dimension": 3432,
+          "active_dimensions": [
+            20,
+            20
+          ],
+          "electronic_offset": "-31/200",
+          "complement_lower": "-1571/40",
+          "electronic_lo": "-8037012109730341507/200000000000000000",
+          "electronic_hi": "-20092530274325853767/500000000000000000",
+          "microscopic_lo": "-8037012109730341507/200000000000000000",
+          "microscopic_hi": "-502313256858145985391/12500000000000000000"
+        },
+        "8": {
+          "spinful_dimension": 3003,
+          "active_dimensions": [
+            35
+          ],
+          "electronic_offset": "-4/25",
+          "complement_lower": "-1963/50",
+          "electronic_lo": "-20100062334309096113/500000000000000000",
+          "electronic_hi": "-1608004986744727689/40000000000000000",
+          "microscopic_lo": "-20100062334309096113/500000000000000000",
+          "microscopic_hi": "-251250779178863521247/6250000000000000000"
+        }
+      }
+    }
+  ],
+  "contrast": {
+    "lo": "2964657750981/100000000000000000000",
+    "hi": "1185869829223/40000000000000000000"
+  }
+}

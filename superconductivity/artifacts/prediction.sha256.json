@@ -1,0 +1,11 @@
+{
+  "Grain/Design.lean": "a508c149f45d25fc32740699551579377ca90eabacea29c79d25d76be54f9ee9",
+  "Grain/Effective.lean": "4f89360ffd677642dcd19a8094cf3eb06e40a8ea624fbdb9e65315776e1677b5",
+  "Grain/Energy.lean": "bf432c8769727324500f42c88a606b0ac59fb2171800f3d81a92451a0c898f0e",
+  "Grain/Model.lean": "11fbce570068dd0b574f87b0bf1e78f2213a72e52eb6a46e23e1b388859e1fb1",
+  "Grain/Prediction.lean": "000ebfee04e2397a849ca1599dec14199705c6f52754be80c934496b06d6dde6",
+  "artifacts/design.json": "4a923df1f072eba483173f4d6c8f3dcb3f8f8be9b084140cf61e51967b8692e6",
+  "lake-manifest.json": "d2adf495bbd5f3feafefee6caa74401150de128cdcc8db40b1e567d8299413b1",
+  "lakefile.toml": "18813b055e73eb388543ce25077d6bf96190a33322289abfd724911576e04d71",
+  "lean-toolchain": "ca5f1f601d34c49079e38d7e7041eb0f2a9c227fbc1df0f404820069a052330c"
+}
