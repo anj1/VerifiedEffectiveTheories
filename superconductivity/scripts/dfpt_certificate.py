@@ -130,40 +130,58 @@ theorem bounds{electrons} :
 """
 
 
-def case_source(index, raw, case, electrons, validation, tolerance):
-    n = len(case.levels)
-    m = len(case.modes)
+def case_inputs_source(raw, case, *, private_checks=False):
+    n, m = len(case.levels), len(case.modes)
     terms = [mode_terms(case, mode) for _, mode in case.modes]
     modes = lean_vec(mode_entries(entries) for entries in terms)
-    allowance = None
-    if not case.density and not case.scattering:
-        allowance = sum((2 * sum(abs(value) for _, value in entries))**2 / (2 * force)
-                        for (force, _), entries in zip(case.modes, terms, strict=True))
     omega = lean_vec(lean_rat(frequency_lower(force)) for force, _ in case.modes)
-    sectors = "".join(sector_source(case, k, validation[str(k)], tolerance, allowance) for k in electrons)
-    return f"""namespace Case{index}
-
-{input_source(raw)}
+    visibility = "private " if private_checks else ""
+    return f"""{input_source(raw)}
 def modes : Fin {m} → List (OrbitalEntry {n}) := {modes}
 def omega : Fin {m} → ℚ := {omega}
 
 theorem input_valid : Valid input := by decide +kernel
 
-private theorem modes_valid : ∀ j, modes j = modeEntries input j := by decide +kernel
+{visibility}theorem modes_valid : ∀ j, modes j = modeEntries input j := by decide +kernel
 
-private theorem omega_valid : frequencyTest input omega := by decide +kernel
-
-{sectors}end Case{index}
+{visibility}theorem omega_valid : frequencyTest input omega := by decide +kernel
 
 """
 
 
-def contrast_source(label, ground, upper, theorem_index, count, electrons, validation, prediction):
+def case_source(index, raw, case, electrons, validation, tolerance, reuse_prediction=False):
+    allowance = None
+    if not case.density and not case.scattering:
+        terms = [mode_terms(case, mode) for _, mode in case.modes]
+        allowance = sum((2 * sum(abs(value) for _, value in entries))**2 / (2 * force)
+                        for (force, _), entries in zip(case.modes, terms, strict=True))
+    sectors = "".join(sector_source(case, k, validation[str(k)], tolerance, allowance) for k in electrons)
+    inputs = "" if reuse_prediction else case_inputs_source(raw, case, private_checks=True)
+    return f"namespace Case{index}\n\n{inputs}{sectors}end Case{index}\n\n"
+
+
+def sector_table(count, electrons, generate):
+    return lean_vec(lean_vec(generate(i, k) for k in electrons) for i in range(count))
+
+
+def energy_source(label, ground, count, electrons):
+    energy = sector_table(count, electrons, lambda i, k: f"{ground} Case{i}.input {k}")
+    return f"noncomputable def {label}Energy (a : Index) : ℝ := ({energy} a.1) a.2\n\n"
+
+
+def contrast_definition(label):
+    return f"""noncomputable def {label}Contrast : ℝ :=
+  ∑ a, (weight a : ℝ) * {label}Energy a
+
+"""
+
+
+def contrast_source(label, ground, upper, theorem_index, count, electrons, validation, prediction,
+                    reuse_prediction=False):
     # Each Fin index identifies one case and one of its three number sectors.
     def table(generate):
-        return lean_vec(lean_vec(generate(i, k) for k in electrons) for i in range(count))
+        return sector_table(count, electrons, generate)
 
-    energy = table(lambda i, k: f"{ground} Case{i}.input {k}")
     lows = table(lambda i, k: f"Case{i}.w{k}.lower")
     highs = table(lambda i, k: f"Case{i}.w{k}.{upper}")
     proofs = ", ".join(f"Case{i}.bounds{k}.{theorem_index}"
@@ -186,9 +204,23 @@ def contrast_source(label, ground, upper, theorem_index, count, electrons, valid
         sign = (f"theorem {label}_negative : {label}Contrast < 0 :=\n"
                 f"  lt_of_le_of_lt {label}_validation.2 (by norm_num)\n\n")
     vlo, vhi, plo, phi = (lean_rat(x) for x in (vlo, vhi, plo, phi))
-    return f"""noncomputable def {label}Energy (a : Index) : ℝ := ({energy} a.1) a.2
+    energy = "" if reuse_prediction else energy_source(label, ground, count, electrons)
+    contrast = "" if reuse_prediction else contrast_definition(label)
+    comparison = f"""theorem {label}_validation_contained :
+    ({plo} : ℚ) ≤ ({vlo} : ℚ) ∧ ({vhi} : ℚ) ≤ ({phi} : ℚ) := by decide +kernel
 
-private def {label}Lo (a : Index) : ℚ := ({lows} a.1) a.2
+"""
+    if not reuse_prediction:
+        comparison = f"""theorem {label}_prediction :
+    (({plo} : ℚ) : ℝ) ≤ {label}Contrast ∧ {label}Contrast ≤ (({phi} : ℚ) : ℝ) := by
+  have hlo : ({plo} : ℚ) ≤ ({vlo} : ℚ) := by decide +kernel
+  have hhi : ({vhi} : ℚ) ≤ ({phi} : ℚ) := by decide +kernel
+  exact ⟨(by exact_mod_cast hlo : (({plo} : ℚ) : ℝ) ≤ (({vlo} : ℚ) : ℝ)).trans {label}_validation.1,
+    {label}_validation.2.trans (by exact_mod_cast hhi)⟩
+
+
+"""
+    return f"""{energy}private def {label}Lo (a : Index) : ℚ := ({lows} a.1) a.2
 private def {label}Hi (a : Index) : ℚ := ({highs} a.1) a.2
 
 theorem {label}_sectors (a : Index) :
@@ -197,33 +229,44 @@ theorem {label}_sectors (a : Index) :
   fin_cases i <;> fin_cases j
 {checks}
 
-noncomputable def {label}Contrast : ℝ :=
-  ∑ a, (weight a : ℝ) * {label}Energy a
-
-theorem {label}_validation :
+{contrast}theorem {label}_validation :
     (({vlo} : ℚ) : ℝ) ≤ {label}Contrast ∧ {label}Contrast ≤ (({vhi} : ℚ) : ℝ) :=
   certified_contrast weight {label}Lo {label}Hi {label}Energy {label}_sectors ({vlo}) ({vhi})
     (by decide +kernel) (by decide +kernel)
 
-theorem {label}_prediction :
-    (({plo} : ℚ) : ℝ) ≤ {label}Contrast ∧ {label}Contrast ≤ (({phi} : ℚ) : ℝ) := by
-  have hlo : ({plo} : ℚ) ≤ ({vlo} : ℚ) := by decide +kernel
-  have hhi : ({vhi} : ℚ) ≤ ({phi} : ℚ) := by decide +kernel
-  exact ⟨(by exact_mod_cast hlo : (({plo} : ℚ) : ℝ) ≤ (({vlo} : ℚ) : ℝ)).trans {label}_validation.1,
-    {label}_validation.2.trans (by exact_mod_cast hhi)⟩
+{comparison}{sign}"""
 
 
-{sign}"""
+def parameters_source(cases, odd, active, weights, tolerance):
+    count = len(cases)
+    weight_vec = lean_vec(lean_rat(weights[name]) for name in cases)
+    orbitals = lean_vec(str(len(case.levels)) for case in cases.values())
+    return f"""abbrev Index := Fin {count} × Fin 3
+
+def oddElectrons : ℕ := {odd}
+def activeOrbitals : ℕ := {active}
+def energyResolution : ℚ := {lean_rat(tolerance)}
+
+def caseWeight : Fin {count} → ℚ := {weight_vec}
+def weight (a : Index) : ℚ := caseWeight a.1 * (![-1/2, 1, -1/2] : Fin 3 → ℚ) a.2
+
+theorem export_parameters :
+    oddElectrons % 2 = 1 ∧ 0 < energyResolution ∧
+    (∀ i : Fin {count}, oddElectrons < 2 * ({orbitals} : Fin {count} → ℕ) i ∧
+      0 < activeOrbitals ∧ activeOrbitals ≤ ({orbitals} : Fin {count} → ℕ) i) ∧
+    (∑ i, caseWeight i) = 0 := by decide +kernel
+
+"""
 
 
-def lean_source(path, frozen, validation, namespace, split=False, case_index=None):
+def lean_source(path, frozen, validation, namespace, split=False, case_index=None, reuse_prediction=False):
     cases, odd, active, weights, tolerance = load(path)
     raw = json.loads(path.read_text(), parse_float=Q)
     if frozen["manifest"] != manifest(path):
         raise ValueError("frozen input or prediction code changed")
     prediction = frozen["prediction"]
     electrons = (odd - 1, odd, odd + 1)
-    imports = "import Grain.DFPTCertificate"
+    imports = f"import Grain.{namespace}Prediction" if reuse_prediction else "import Grain.DFPTCertificate"
     if split and case_index is None:
         imports = "\n".join(f"import Grain.{namespace}.Case{i}" for i in range(len(cases)))
     header = f"""{imports}
@@ -246,30 +289,14 @@ set_option maxHeartbeats 0
                                      validation["sectors"][name], tolerance / 32)
                 + f"end Grain.HarmonicBand.{namespace}\n")
     case_modules = "" if split else "".join(
-        case_source(i, raw["cases"][name], case, electrons, validation["sectors"][name], tolerance / 32)
+        case_source(i, raw["cases"][name], case, electrons, validation["sectors"][name], tolerance / 32, reuse_prediction)
         for i, (name, case) in enumerate(cases.items()))
+    parameters = "" if reuse_prediction else parameters_source(cases, odd, active, weights, tolerance)
     count = len(cases)
-    weight_vec = lean_vec(lean_rat(w) for w in weights.values())
-    orbitals = lean_vec(str(len(case.levels)) for case in cases.values())
-    return header + f"""{case_modules}abbrev Index := Fin {count} × Fin 3
-
-def oddElectrons : ℕ := {odd}
-def activeOrbitals : ℕ := {active}
-def energyResolution : ℚ := {lean_rat(tolerance)}
-
-def caseWeight : Fin {count} → ℚ := {weight_vec}
-def weight (a : Index) : ℚ := caseWeight a.1 * (![-1/2, 1, -1/2] : Fin 3 → ℚ) a.2
-
-theorem export_parameters :
-    oddElectrons % 2 = 1 ∧ 0 < energyResolution ∧
-    (∀ i : Fin {count}, oddElectrons < 2 * ({orbitals} : Fin {count} → ℕ) i ∧
-      0 < activeOrbitals ∧ activeOrbitals ≤ ({orbitals} : Fin {count} → ℕ) i) ∧
-    (∑ i, caseWeight i) = 0 := by decide +kernel
-
-{contrast_source("electronic", "electronicGround", "electronicUpper", 1, count, electrons,
-                 validation["instantaneous_contrast_mev"], prediction["instantaneous_contrast_mev"])}
+    return header + f"""{case_modules}{parameters}{contrast_source("electronic", "electronicGround", "electronicUpper", 1, count, electrons,
+                 validation["instantaneous_contrast_mev"], prediction["instantaneous_contrast_mev"], reuse_prediction)}
 {contrast_source("harmonic", "harmonicGround", "harmonicUpper", 2, count, electrons,
-                 validation["parent_contrast_mev"], prediction["parent_contrast_mev"])}
+                 validation["parent_contrast_mev"], prediction["parent_contrast_mev"], reuse_prediction)}
 end Grain.HarmonicBand.{namespace}
 """
 
@@ -281,6 +308,7 @@ def main():
     parser.add_argument("validation", type=Path)
     parser.add_argument("--namespace", default="DFPTExport")
     parts = parser.add_mutually_exclusive_group()
+    parts.add_argument("--shell-prediction", action="store_true", help="reuse the standalone shell prediction module")
     parts.add_argument("--split", action="store_true", help="emit the module importing the case certificates")
     parts.add_argument("--case-index", type=int, help="emit one zero-based case certificate module")
     args = parser.parse_args()
@@ -289,7 +317,7 @@ def main():
     try:
         print(lean_source(args.input, json.loads(args.prediction.read_text()),
                           json.loads(args.validation.read_text()), args.namespace,
-                          args.split, args.case_index), end="")
+                          args.split, args.case_index, args.shell_prediction), end="")
     except (ArithmeticError, KeyError, TypeError, ValueError, OSError) as error:
         parser.error(str(error))
 

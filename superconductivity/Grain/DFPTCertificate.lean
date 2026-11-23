@@ -95,19 +95,35 @@ private def modeCost (d : Input n c m) (modes : Fin m → List (OrbitalEntry n))
   max 0 (quadratic (electronicColumn d) v - w.trialUpper * dot v (entry v)) /
     (2 * d.force j * ω j)
 
+/-- A sparse rational vector checked against the assembled electronic operator. -/
+def electronicTrialCheck (d : Input n c m) (modes : Fin m → List (OrbitalEntry n))
+    (N : ℕ) (u : ℚ) (v : Vector (State n)) : Prop :=
+  vectorTest N v = true ∧ 0 < dot v (entry v) ∧
+    quadratic (instantaneousColumnWith d modes) v ≤ u * dot v (entry v)
+
+instance (d : Input n c m) (modes : Fin m → List (OrbitalEntry n))
+    (N : ℕ) (u : ℚ) (v : Vector (State n)) : Decidable (electronicTrialCheck d modes N u v) := by
+  unfold electronicTrialCheck
+  infer_instance
+
+def harmonicTrialCheck (d : Input n c m) (modes : Fin m → List (OrbitalEntry n))
+    (ω : Fin m → ℚ) (N : ℕ) (w : SectorWitness n) : Prop :=
+  electronicTrialCheck d modes N w.trialUpper w.trial ∧
+    (∀ j, vectorTest N (dressedVector modes w.trial j) = true) ∧
+    w.trialUpper ≤ w.harmonicUpper ∧
+    ((List.finRange m).map (modeCost d modes ω w)).sum ≤
+      (w.harmonicUpper - w.trialUpper) * dot w.trial (entry w.trial)
+
+instance (d : Input n c m) (modes : Fin m → List (OrbitalEntry n))
+    (ω : Fin m → ℚ) (N : ℕ) (w : SectorWitness n) : Decidable (harmonicTrialCheck d modes ω N w) := by
+  unfold harmonicTrialCheck
+  infer_instance
+
 def trialCheck (d : Input n c m) (modes : Fin m → List (OrbitalEntry n))
     (ω : Fin m → ℚ) (N : ℕ) (w : SectorWitness n) : Prop :=
-  let ns := dot w.trial (entry w.trial)
-  let v := w.electronicTrial.getD w.trial
-  vectorTest N w.trial = true ∧ 0 < ns ∧
-    quadratic (instantaneousColumnWith d modes) w.trial ≤
-      w.trialUpper * ns ∧
-    (vectorTest N v = true ∧ 0 < dot v (entry v) ∧
-      quadratic (instantaneousColumnWith d modes) v ≤ w.electronicUpper * dot v (entry v)) ∧
-    (∀ j, vectorTest N (dressedVector modes w.trial j) = true) ∧
-    (w.squares.all fun t => decide (0 ≤ t.1)) = true ∧ budgetCheck d modes w ∧
-    w.trialUpper ≤ w.harmonicUpper ∧
-    ((List.finRange m).map (modeCost d modes ω w)).sum ≤ (w.harmonicUpper - w.trialUpper) * ns
+  harmonicTrialCheck d modes ω N w ∧
+    electronicTrialCheck d modes N w.electronicUpper (w.electronicTrial.getD w.trial) ∧
+    (w.squares.all fun t => decide (0 ≤ t.1)) = true ∧ budgetCheck d modes w
 
 instance (d : Input n c m) (modes : Fin m → List (OrbitalEntry n))
     (ω : Fin m → ℚ) (N : ℕ) (w : SectorWitness n) : Decidable (trialCheck d modes ω N w) := by
@@ -151,49 +167,29 @@ private theorem dressing_sq (d : Input n c m) (h : Valid d) (j : Fin m) :
       field_simp
     _ = _ := by rw [he, div_div]
 
-theorem sector_certificate (d : Input n c m) (h : Valid d)
+theorem electronic_trial (d : Input n c m) (modes : Fin m → List (OrbitalEntry n))
+    (hm : ∀ j, modes j = modeEntries d j) (N : ℕ) (u : ℚ) (v : Vector (State n))
+    (h : electronicTrialCheck d modes N u v) :
+    ∃ x : State n → ℝ, supported N x ∧ 0 < normSq x ∧
+      form (instantaneous d) x ≤ (u : ℝ) * normSq x := by
+  have hm' := funext hm
+  subst modes
+  refine ⟨_, vector_supported h.1, ?_, ?_⟩
+  · rw [← norm_cast]
+    exact_mod_cast h.2.1
+  · rw [← quadratic_cast (instantaneousColumn d) _ (instantaneousColumn_entry d), ← norm_cast]
+    exact_mod_cast h.2.2
+
+/-- Dress an electronic trial using a lower bound supplied by either certificate path. -/
+theorem harmonic_trial_certificate (d : Input n c m) (h : Valid d)
     (modes : Fin m → List (OrbitalEntry n)) (hm : ∀ j, modes j = modeEntries d j)
     (ω : Fin m → ℚ) (hω : frequencyTest d ω) (N : ℕ) (w : SectorWitness n)
-    (hr : ∀ i, rowCheck d modes N w i) (ht : trialCheck d modes ω N w) :
-    ((w.lower : ℝ) ≤ electronicGround d N ∧ electronicGround d N ≤ (w.electronicUpper : ℝ)) ∧
-    ((w.lower : ℝ) ≤ harmonicGround d N ∧ harmonicGround d N ≤ (w.harmonicUpper : ℝ)) := by
+    (lower : ∀ x, supported N x → (w.lower : ℝ) * normSq x ≤ form (instantaneous d) x)
+    (ht : harmonicTrialCheck d modes ω N w) :
+    (w.lower : ℝ) ≤ harmonicGround d N ∧ harmonicGround d N ≤ (w.harmonicUpper : ℝ) := by
   have hm' : modes = modeEntries d := funext hm
   subst modes
-  obtain ⟨hs, hn, hu, ⟨hvs, hvn, hvu⟩, ha, hpos, hbudget, he, hc⟩ := ht
-  have hlo (i : State n) : rowTest
-      (subtractSquares (sectorColumn d (modeEntries d) N w.lower) w.squares i)
-      (cappedWeight w N) w.lower i := by
-    have hi := hr i
-    unfold rowCheck at hi
-    split at hi
-    · rename_i hout
-      obtain ⟨hsector, hsquares⟩ := hout
-      simp [sectorColumn, hsector, hsquares, subtractSquares, cappedWeight, rowTest, offDiagonal,
-        defaultWeight]
-    · split at hi
-      · rename_i hfast
-        obtain ⟨his, hsector, hw, hk⟩ := hfast
-        cases hb : w.rowBudget with
-        | none => simp [hb] at his
-        | some b =>
-          rw [hb] at hk
-          unfold budgetCheck at hbudget
-          rw [hb] at hbudget
-          obtain ⟨hd, hscat, hsquares, hbudget⟩ := hbudget
-          rw [hsquares]
-          simp only [subtractSquares, sectorColumn, hsector, ite_true, instantaneousColumnWith,
-            List.filter_cons]
-          apply rowTest_kinetic _ _ _ _ b
-          · rw [hw]; norm_num [defaultWeight]
-          · intro j
-            rw [hw]
-            exact cappedWeight_le w N j
-          · exact (absSum_filter _ _).trans ((absSum_compact _).trans
-              ((perturbation_absSum d _ h hd hscat i).trans hbudget))
-          · exact hk
-      · exact hi
-  have lower := sector_lower d h (modeEntries d) (fun _ => rfl) N w.lower (cappedWeight w N) w.squares
-    (fun t ht => of_decide_eq_true (List.all_eq_true.mp hpos t ht)) hlo
+  obtain ⟨⟨hs, hn, hu⟩, ha, he, hc⟩ := ht
   let x : State n → ℝ := fun i => (entry w.trial i : ℝ)
   have hx := vector_supported hs
   have hnorm : 0 < normSq x := by
@@ -205,17 +201,6 @@ theorem sector_certificate (d : Input n c m) (h : Valid d)
     dsimp [x]
     rw [← hquad, ← norm_cast]
     exact_mod_cast hu
-  let v := w.electronicTrial.getD w.trial
-  let xv : State n → ℝ := fun i => (entry v i : ℝ)
-  have hvnorm : 0 < normSq xv := by
-    dsimp [xv]
-    rw [← norm_cast]
-    exact_mod_cast hvn
-  have hvupper : form (instantaneous d) xv ≤ (w.electronicUpper : ℝ) * normSq xv := by
-    dsimp [xv]
-    rw [← quadratic_cast (instantaneousColumn d) _ (instantaneousColumn_entry d), ← norm_cast]
-    exact_mod_cast hvu
-  refine ⟨electronic_bounds d N lower xv (vector_supported hvs) hvnorm hvupper, ?_⟩
   have hε : (0 : ℝ) ≤ (w.harmonicUpper : ℝ) - w.trialUpper := by
     exact sub_nonneg.mpr (by exact_mod_cast he)
   have hb := harmonic_bounds d h N lower x hx hnorm hupper hε
@@ -266,6 +251,53 @@ theorem sector_certificate (d : Input n c m) (h : Valid d)
     rw [← Rat.cast_sum, ← norm_cast]
     rw [← Fin.sum_univ_def] at hc
     exact_mod_cast hc
+
+theorem sector_certificate (d : Input n c m) (h : Valid d)
+    (modes : Fin m → List (OrbitalEntry n)) (hm : ∀ j, modes j = modeEntries d j)
+    (ω : Fin m → ℚ) (hω : frequencyTest d ω) (N : ℕ) (w : SectorWitness n)
+    (hr : ∀ i, rowCheck d modes N w i) (ht : trialCheck d modes ω N w) :
+    ((w.lower : ℝ) ≤ electronicGround d N ∧ electronicGround d N ≤ (w.electronicUpper : ℝ)) ∧
+    ((w.lower : ℝ) ≤ harmonicGround d N ∧ harmonicGround d N ≤ (w.harmonicUpper : ℝ)) := by
+  have hm' : modes = modeEntries d := funext hm
+  subst modes
+  obtain ⟨htrial, hvt, hpos, hbudget⟩ := ht
+  have hlo (i : State n) : rowTest
+      (subtractSquares (sectorColumn d (modeEntries d) N w.lower) w.squares i)
+      (cappedWeight w N) w.lower i := by
+    have hi := hr i
+    unfold rowCheck at hi
+    split at hi
+    · rename_i hout
+      obtain ⟨hsector, hsquares⟩ := hout
+      simp [sectorColumn, hsector, hsquares, subtractSquares, cappedWeight, rowTest, offDiagonal,
+        defaultWeight]
+    · split at hi
+      · rename_i hfast
+        obtain ⟨his, hsector, hw, hk⟩ := hfast
+        cases hb : w.rowBudget with
+        | none => simp [hb] at his
+        | some b =>
+          rw [hb] at hk
+          unfold budgetCheck at hbudget
+          rw [hb] at hbudget
+          obtain ⟨hd, hscat, hsquares, hbudget⟩ := hbudget
+          rw [hsquares]
+          simp only [subtractSquares, sectorColumn, hsector, ite_true, instantaneousColumnWith,
+            List.filter_cons]
+          apply rowTest_kinetic _ _ _ _ b
+          · rw [hw]; norm_num [defaultWeight]
+          · intro j
+            rw [hw]
+            exact cappedWeight_le w N j
+          · exact (absSum_filter _ _).trans ((absSum_compact _).trans
+              ((perturbation_absSum d _ h hd hscat i).trans hbudget))
+          · exact hk
+      · exact hi
+  have lower := sector_lower d h (modeEntries d) (fun _ => rfl) N w.lower (cappedWeight w N) w.squares
+    (fun t ht => of_decide_eq_true (List.all_eq_true.mp hpos t ht)) hlo
+  obtain ⟨x, hx, hn, hu⟩ := electronic_trial d (modeEntries d) (fun _ => rfl) N _ _ hvt
+  exact ⟨electronic_bounds d N lower x hx hn hu,
+    harmonic_trial_certificate d h (modeEntries d) (fun _ => rfl) ω hω N w lower htrial⟩
 
 theorem widen_bounds {l u budget : ℚ} {e : ℝ} (h : 0 ≤ budget)
     (b : (l : ℝ) ≤ e ∧ e ≤ (u : ℝ)) :

@@ -82,6 +82,18 @@ The central-orbital bare model predicts zero contrast.
 [Headline theorem](superconductivity/Grain/Main.lean) ·
 [Reproduction commands](superconductivity/README.md#reproduce)
 
+For MgB₂, independently calculated electron–phonon inputs identify the
+intraband σ channel as the largest contributor to the leading static pairing
+eigenvalue. Lean checks the channel removals at two- and four-sheet resolution.
+Mode-resolved data identify the boron bond-stretching doublet at the A point.
+[MgB₂ calculation](superconductivity/README.md#which-couplings-dominate-in-mgb2)
+
+The pairing workflow derives the retarded exchange coefficient from the
+harmonic parent and certifies a synthetic Eliashberg crossing with all
+Matsubara frequencies included. It also checks Fermi-window quadrature
+when the electronic calculation supplies cellwise band-energy bounds.
+[Electronic structure to pairing](superconductivity/README.md#electronic-structure-to-pairing-eigenvalue)
+
 ## Verify atomcrystal
 
 The source and provenance checks require only Python 3. From the repository root:

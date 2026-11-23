@@ -1,0 +1,28 @@
+{
+  "material": "MgB2",
+  "static_entry_sensitivity": "0.10",
+  "liu": {
+    "source": "https://arxiv.org/pdf/cond-mat/0103570",
+    "locator": "Tables I and II, sheet order 1, 2, 3, 4 (sigma, sigma, pi, pi)",
+    "dos_per_ry_spin_cell": ["0.66", "1.38", "1.26", "1.52"],
+    "static_interaction_ry": [
+      ["0.676", "0.419", "0.064", "0.096"],
+      ["0.419", "0.477", "0.064", "0.097"],
+      ["0.064", "0.064", "0.113", "0.106"],
+      ["0.096", "0.097", "0.106", "0.092"]
+    ]
+  },
+  "brinkman": {
+    "source": "https://arxiv.org/pdf/cond-mat/0111115",
+    "locator": "v2, page 2, dimensionless lambda at equal Matsubara frequencies, band order sigma, pi",
+    "static_coupling": [["1.017", "0.213"], ["0.155", "0.448"]]
+  },
+  "shukla": {
+    "source": "https://arxiv.org/pdf/cond-mat/0209064",
+    "locator": "Table I, A-point coupling in ascending frequency order, and Table II, A-point X-ray estimate per E2g component",
+    "a_point_mode_lambda": ["0.00", "0.00", "0.05", "0.05", "0.28", "0.02", "2.83", "2.83", "0.00"],
+    "a_point_e2g_mode_indices": [6, 7],
+    "a_point_e2g_xray_lambda": "3.6",
+    "a_point_e2g_xray_reported_error": "0.8"
+  }
+}

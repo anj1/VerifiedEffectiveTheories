@@ -101,9 +101,10 @@ def cooperKernel (c : Crystal s) (b : BandData s) (i j : s) : ℚ :=
   ∑ a, attraction c a * b.orbital a i ^ 2 * b.orbital a j ^ 2 /
     (orbitalNorm b i * orbitalNorm b j)
 
-/-- Projection of the local two-body attraction on the normal-state pair
-wavefunctions. The interaction acts only at coincident site indices.
-The normalization is the norm of each product of two orbital vectors. -/
+/-- The exact matrix elements of the local attraction between time-reversed
+normal-state pairs. Restricting the interaction to these matrix elements
+is a channel selection. The normalization is the norm of each product
+of two orbital vectors. -/
 theorem projected_cooper (c : Crystal s) (b : BandData s) (i j : s) :
     (∑ ab : s × s, if ab.1 = ab.2 then
       attraction c ab.1 * (b.orbital ab.1 i * b.orbital ab.2 i) *
@@ -126,8 +127,8 @@ instance (c : Crystal s) (b : BandData s) (g : ℚ) : Decidable (constantChannel
   infer_instance
 
 omit [DecidableEq s] in
-/-- A nonzero solution of the projected gap equation is constant across the
-band indices when the computed Cooper matrix is constant. -/
+/-- Assuming mean-field self-consistency (`he`), every nonzero solution is
+constant across band indices when the projected Cooper matrix is constant. -/
 theorem constant_solution [Nonempty s] (c : Crystal s) (b : BandData s)
     (g : ℚ) (h : constantChannel c b g) (chi : s → ℝ) (gap : s → ℝ)
     (he : ∀ i, gap i = ∑ j, (cooperKernel c b i j : ℝ) * (gap j * chi j))

@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """Freeze DFPT shell predictions and compare them with full-sector enclosures."""
 import argparse
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 from fractions import Fraction as Q
 from hashlib import sha256
 from itertools import product
@@ -271,10 +271,56 @@ def residual_reduction(a, b, d, delta, budget):
                    for i, row in enumerate(weights)]
     lifted = [[a[i][j]+sum(b[i][k]*weights[k][j]+weights[k][i]*residual[k][j]
                            for k in range(len(d))) for j in range(p)] for i in range(p)]
-    return lifted, error, step
+    return lifted, error, step, weights
 
 
-def retained_ground(matrix, keep, tolerance):
+@dataclass(frozen=True)
+class ShellBlock:
+    left: Q
+    kept: list
+    discarded: list
+    a: list
+    b: list
+    d: list
+    pivot_lower: Q | None
+
+
+@dataclass(frozen=True)
+class Reduction:
+    block: int
+    weights: list
+    delta: Q
+    error: Q
+    positive: tuple | None
+    corrected: tuple | None
+    trial: list | None
+
+
+@dataclass(frozen=True)
+class BracketStep:
+    trial_energy: Q
+    reductions: list
+    update: str
+    error: Q
+    endpoints: tuple
+
+
+@dataclass
+class ShellTrace:
+    initial: tuple = ()
+    initial_trial: int | None = None
+    blocks: tuple = ()
+    steps: list = field(default_factory=list)
+
+
+def nonpositive_trial(lifted, shift):
+    _, trial = shifted_factor([[-v for v in row] for row in lifted], [1]*len(lifted), -shift)
+    if trial is None:
+        raise ArithmeticError("retained factor failed without a nonpositive trial")
+    return trial
+
+
+def retained_ground(matrix, keep, tolerance, trace=None):
     lo, hi = matrix_bounds(matrix)
     max_steps = 0
     # Since the matrix is block diagonal across its connected components,
@@ -295,33 +341,51 @@ def retained_ground(matrix, keep, tolerance):
                 raise ValueError("discarded block is not certified above the ground window. Increase the active space")
         else:
             pivot_lower = None
-        blocks.append((left, a, b, d, pivot_lower))
+        blocks.append(ShellBlock(left, p, q, a, b, d, pivot_lower))
+    if trace is not None:
+        trace.initial = (lo, hi)
+        trace.initial_trial = next(i for i, row in enumerate(matrix) if row.get(i, 0) == hi)
+        trace.blocks = tuple(blocks)
+        trace.steps.clear()
     budget = tolerance/4
     while hi-lo > tolerance:
         z = (hi+lo)/2
         all_lower = True
         upper = False
         largest_error = Q(0)
-        for left, a, b, d, pivot_lower in blocks:
-            if left >= z or not a:
+        reductions = []
+        for index, block in enumerate(blocks):
+            a, b, d = block.a, block.b, block.d
+            if block.left >= z or not a:
                 continue
             shifted_a = [[v-z if i == j else v for j, v in enumerate(row)] for i, row in enumerate(a)]
             shifted_d = [[v-z if i == j else v for j, v in enumerate(row)] for i, row in enumerate(d)]
-            lifted, error, steps = residual_reduction(
-                shifted_a, b, shifted_d, pivot_lower-z if d else 1, budget)
+            delta = block.pivot_lower-z if d else Q(1)
+            lifted, error, steps, weights = residual_reduction(shifted_a, b, shifted_d, delta, budget)
             max_steps = max(max_steps, steps)
             largest_error = max(largest_error, error)
-            if factor(lifted, 0) is None:
+            positive = factor(lifted, 0)
+            corrected = factor(lifted, error) if positive is not None else None
+            if trace is not None:
+                shift = 0 if positive is None else error
+                trial = nonpositive_trial(lifted, shift) if corrected is None else None
+                reductions.append(Reduction(index, weights, delta, error, positive, corrected, trial))
+            if positive is None:
                 upper = True
                 break
-            if factor(lifted, error) is None:
+            if corrected is None:
                 all_lower = False
         if upper:
             hi = z
+            update = "upper"
         elif all_lower:
             lo = z
+            update = "lower"
         else:
             lo, hi = max(lo, z-largest_error), min(hi, z+largest_error)
+            update = "intersect"
+        if trace is not None:
+            trace.steps.append(BracketStep(z, reductions, update, largest_error, (lo, hi)))
     return (lo, hi), max_steps
 
 
@@ -340,18 +404,19 @@ def keep_indices(states, levels, electrons, active):
             and all((state >> (2*i)) & 3 == 0 for i in upper)}
 
 
-def predicted_sector(case, electrons, active, tolerance):
+def predicted_sector(case, electrons, active, tolerance, trace=None, *, diagnostics=True):
     states, kinetic, matrix, normal_norm, dressing = electronic_sector(case, electrons)
     keep = keep_indices(states, case.levels, electrons, active)
-    (lo, hi), steps = retained_ground(matrix, keep, tolerance)
+    (lo, hi), steps = retained_ground(matrix, keep, tolerance, trace)
     # Dressed-state variational bound versus the instantaneous ground energy.
     # The lower spectral bound applies to all oscillator occupations.
     phonon_error = (normal_norm-lo)*dressing
     upstream = case.upstream
-    return {"instantaneous": (lo, hi), "parent": (lo-upstream, hi+phonon_error+upstream),
-            "second_order": second_order(matrix, kinetic, tolerance),
-            "phonon_error": phonon_error, "active_configurations": len(keep),
-            "configurations": len(states), "max_jacobi_steps": steps}
+    result = {"instantaneous": (lo, hi), "parent": (lo-upstream, hi+phonon_error+upstream)}
+    if diagnostics:
+        result["second_order"] = second_order(matrix, kinetic, tolerance)
+    return result | {"phonon_error": phonon_error, "active_configurations": len(keep),
+                     "configurations": len(states), "max_jacobi_steps": steps}
 
 
 def combine(terms):

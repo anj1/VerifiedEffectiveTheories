@@ -83,6 +83,22 @@ private theorem sphere_values (F : ι → ι → ℝ) (D : ι → ℝ) (hD : ∀
   · rintro ⟨x, hx, rfl⟩
     exact ⟨x, realMetric_pos (sphere_not_zero x hx) hD, rfl⟩
 
+theorem form_le_spectrum (F : ι → ι → ℝ) (D : ι → ℝ) (hD : ∀ i, 0 < D i)
+    (x : ι → ℝ) : realForm F x ≤ spectrumTop F D * realMetric D x := by
+  by_cases h : x = 0
+  · simp [h, realForm, realMetric]
+  · have hx := realMetric_pos h hD
+    have hc : IsCompact (values F D) := by
+      rw [sphere_values F D hD]
+      apply sphere_compact.image_of_continuousOn
+      apply ContinuousOn.div
+      · exact (continuous_finsetSum _ fun i _ => continuous_finsetSum _ fun j _ =>
+          continuous_const.mul ((continuous_apply i).mul (continuous_apply j))).continuousOn
+      · exact (continuous_finsetSum _ fun i _ =>
+          continuous_const.mul ((continuous_apply i).pow 2)).continuousOn
+      · exact fun y hy => (realMetric_pos (sphere_not_zero y hy) hD).ne'
+    exact (div_le_iff₀ hx).1 (le_csSup hc.bddAbove ⟨x, hx, rfl⟩)
+
 theorem spectrum_continuous (F : ℝ → ι → ι → ℝ) (D : ℝ → ι → ℝ)
     (hF : ∀ i j, Continuous fun t => F t i j) (hD : ∀ i, Continuous fun t => D t i)
     (hp : ∀ t i, 0 < D t i) : Continuous fun t => spectrumTop (F t) (D t) := by
@@ -174,7 +190,7 @@ theorem spectrum_eigenvector [Nonempty ι] [DecidableEq ι] (F : ι → ι → �
 
 end Rayleigh
 
-private theorem continuous_phonon (b : List ModeBox) (m : List RealMode)
+theorem continuous_phonon (b : List ModeBox) (m : List RealMode)
     (h : List.Forall₂ ModeBox.matches b m) (v : ℝ → ℝ) (hv : Continuous v)
     (hn : ∀ t, 0 ≤ v t) : Continuous fun t => phononResponse m (v t) := by
   induction h with
@@ -185,7 +201,7 @@ private theorem continuous_phonon (b : List ModeBox) (m : List RealMode)
     exact continuous_const.div (continuous_const.add hv) (fun t =>
       ne_of_gt (add_pos_of_pos_of_nonneg (mul_pos ho ho) (hn t)))
 
-private theorem continuous_transfers (n m : Fin N) :
+theorem continuous_transfers (n m : Fin N) :
     (Continuous fun t => (realTransferSq t n m).1) ∧
     (Continuous fun t => (realTransferSq t n m).2) := by
   unfold realTransferSq
@@ -195,7 +211,7 @@ theorem mesh_metric_pos {p : Type} [Fintype p] (b : Mesh p) (r : Realization p)
     (h : b.matches r) (hw : 0 < b.halfWidth) (hd : ∀ i, 0 < (dosBox b i).lo)
     (t : ℝ) (a : p × Fin N) : 0 < meshMetric b r t a := by
   have hwgt (i : p) : 0 < dos b r i := (by exact_mod_cast hd i : (0 : ℝ) < (dosBox b i).lo).trans_le
-    (weight_enclosure _ hw _ _ (h.1 i)).1
+    (dos_enclosure b r h hw i).1
   unfold meshMetric
   apply div_pos _ (hwgt a.1)
   apply add_pos_of_pos_of_nonneg

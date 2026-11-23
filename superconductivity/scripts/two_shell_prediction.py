@@ -146,8 +146,21 @@ def build_prediction():
     return {"d": 1, "g": str(G), "neumann_terms": TERMS, "cases": cases, "contrast": contrast}
 
 
+def cubic_parity_matched_coupling(g, radii):
+    """Match the three-orbital parity to the full parity through cubic order."""
+    # The closed three-hop loops give the cubic term in Grain.ParityMatching.
+    inverses = [1 / Fraction(radius) for radius in radii]
+    inverse_sum = sum(inverses)
+    inverse_square_sum = sum((inverse**2 for inverse in inverses), Fraction(0))
+    return g + g**2 * inverse_sum + g**3 * (inverse_sum**2 - inverse_square_sum / 2)
+
+
 def scalar_control():
-    """Enclose the contrast for the inverse-coupling update on three orbitals."""
+    """Enclose the mixed contrast for the cubic-matched control on three orbitals.
+
+    The mixed contrast cancels the additive quadratic parity correction.
+    The three-hop loop term fixes its leading cubic coefficient.
+    """
     from certify import components, factor, hamiltonian
 
     def bounds(strength, electrons):
@@ -165,7 +178,7 @@ def scalar_control():
 
     intervals = []
     for r, s in RADII:
-        strength = 1 / (1 / G - Fraction(1, r) - Fraction(1, s))
+        strength = cubic_parity_matched_coupling(G, (r, s))
         (l2, u2), (l3, u3), (l4, u4) = (bounds(strength, n) for n in (2, 3, 4))
         intervals.append((l3 - (u2 + u4) / 2, u3 - (l2 + l4) / 2))
     (la, ua), (lb, ub), (lc, uc), (ld, ud) = intervals
@@ -206,7 +219,7 @@ def main():
     parser = argparse.ArgumentParser(description=__doc__)
     mode = parser.add_mutually_exclusive_group()
     mode.add_argument("--check", action="store_true", help="reproduce without writing")
-    mode.add_argument("--scalar-control", action="store_true", help="enclose the scalar coupling control")
+    mode.add_argument("--scalar-control", action="store_true", help="enclose the cubic parity-matched scalar control")
     args = parser.parse_args()
     if args.scalar_control:
         lo, hi = scalar_control()

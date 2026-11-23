@@ -2,12 +2,11 @@
 """Reproduce the four-site channel certificates checked by Lean."""
 import argparse
 from fractions import Fraction
-from itertools import product
 from pathlib import Path
 
 from crystal_bcs import read_crystal
 from fermion import apply
-from four_site_eft import difference
+from four_site_eft import difference, momentum_interactions, pair_source_terms
 from thermal_bounds import free_energy, trace_bounds
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -17,17 +16,9 @@ RESPONSE_GRID = 10**6
 
 
 def signed_columns(crystal, mask, field):
-    terms = []
-    for q, k, p in product(range(4), repeat=3):
-        channel = 0 if k == p else 1 if k ^ p == q else 2
-        if q == 0 or mask & (1 << channel):
-            terms.append((-40 * crystal.coupling,
-                          ((True, 2*k), (True, 2*(q^k)+1),
-                           (False, 2*(q^p)+1), (False, 2*p))))
+    terms = momentum_interactions(40 * crystal.coupling, mask)
     if field:
-        for k in range(4):
-            terms.extend([(-2, ((True, 2*k), (True, 2*k+1))),
-                          (-2, ((False, 2*k+1), (False, 2*k)))])
+        terms.extend((2 * value, ops) for value, ops in pair_source_terms())
     columns = []
     for state in range(DIMENSION):
         kinetic = sum(40 * crystal.xi[k] * ((state >> (2*k) & 3).bit_count())

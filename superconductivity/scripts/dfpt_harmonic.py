@@ -1,11 +1,14 @@
 #!/usr/bin/env python3
-"""Emit a Lean reconstruction of a single real spin-degenerate DFPT band."""
+"""Reconstruct a single real spin-degenerate DFPT band or report its pair transfers."""
 import argparse
 from fractions import Fraction
+from itertools import combinations, product
 import json
 from pathlib import Path
 
+from dfpt_full_assembly import assemble_full_sector
 from dfpt_shell_eft import parse_case
+from fermion import symmetric
 from pairing import lean_rat, lean_vec
 
 
@@ -80,10 +83,38 @@ end Grain.HarmonicBand.Export
 """
 
 
+def pair_transfers(raw):
+    """Resolve the static transfer between doubly occupied orbitals by mode."""
+    case = parse_case(raw)
+    normal, modes, instantaneous = assemble_full_sector(case, 2)
+    if not symmetric(normal):
+        raise ValueError("screened electronic interaction is not Hermitian")
+    slots = product(range(len(case.levels)), range(2))
+    pairs = [index for index, (a, b) in enumerate(combinations(slots, 2)) if a[0] == b[0]]
+    transfers = []
+    for i, j in combinations(range(len(pairs)), 2):
+        left, right = pairs[i], pairs[j]
+        contributions = []
+        for mode, (force, rows) in enumerate(modes):
+            coefficient = -sum(row.get(left, 0) * row.get(right, 0) for row in rows) / (2 * force)
+            if coefficient:
+                contributions.append((mode, coefficient))
+        contributions.sort(key=lambda entry: (-abs(entry[1]), entry[0]))
+        transfers.append({
+            "orbitals": [i, j],
+            "screened_mev": str(normal[left].get(right, 0)),
+            "phonon_mev": str(sum(value for _, value in contributions)),
+            "instantaneous_mev": str(instantaneous[left].get(right, 0)),
+            "modes": [{"index": mode, "mev": str(value)} for mode, value in contributions],
+        })
+    return {"screening_convention": raw["screening_convention"], "transfers": transfers}
+
+
 def main():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("input", type=Path, help="DFPT case or shell experiment JSON")
     parser.add_argument("--case", help="case name in a shell experiment export")
+    parser.add_argument("--pair-transfer", action="store_true", help="report static pair entries as JSON")
     args = parser.parse_args()
     try:
         raw = json.loads(args.input.read_text(), parse_float=Fraction)
@@ -93,7 +124,10 @@ def main():
             raw = raw["cases"][args.case]
         elif args.case is not None:
             raise ValueError("--case requires a shell experiment JSON")
-        print(lean_source(raw), end="")
+        if args.pair_transfer:
+            print(json.dumps(pair_transfers(raw), indent=2))
+        else:
+            print(lean_source(raw), end="")
     except (KeyError, TypeError, ValueError, OSError) as error:
         parser.error(str(error))
 

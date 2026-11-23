@@ -49,6 +49,23 @@ theorem benchmark_bounds (t : Temperature) (mask : Fin 8) :
     exacts [m0Response1, m1Response1, m2Response1, m3Response1,
       m4Response1, m5Response1, m6Response1, m7Response1]
 
+/-- The signed excess response from keeping only the Cooper interaction,
+with the same uniform pair source in both traces. -/
+theorem cooper_only_excess :
+    (3.967455 ≤ response .cold 0 - response .cold 7 ∧
+      response .cold 0 - response .cold 7 ≤ 3.967457) ∧
+    (0.769742 ≤ response .warm 0 - response .warm 7 ∧
+      response .warm 0 - response .warm 7 ≤ 0.769744) := by
+  have coldCooper := benchmark_bounds .cold 0
+  have coldFull := benchmark_bounds .cold 7
+  have warmCooper := benchmark_bounds .warm 0
+  have warmFull := benchmark_bounds .warm 7
+  norm_num [lower, upper, m0Response0Lo, m0Response0Hi, m7Response0Lo, m7Response0Hi,
+    m0Response1Lo, m0Response1Hi, m7Response1Lo, m7Response1Hi]
+    at coldCooper coldFull warmCooper warmFull
+  exact ⟨⟨by linarith [coldCooper.1, coldFull.2], by linarith [coldCooper.2, coldFull.1]⟩,
+    ⟨by linarith [warmCooper.1, warmFull.2], by linarith [warmCooper.2, warmFull.1]⟩⟩
+
 /-- One percent relative to the full Hubbard response. -/
 def withinBudget (t : Temperature) (mask : Fin 8) : Prop :=
   |response t mask - response t 7| ≤ response t 7 / 100

@@ -329,6 +329,7 @@ def lean_source(crystal, prediction, observations):
 def report(crystal, prediction, observations, tolerance):
     xi, g = crystal.xi, crystal.coupling
     result = {
+        "model": "finite static BCS mean field",
         "levels_relative_to_mu_mev": list(map(str, xi)),
         "phonon_induced_onsite_attraction_mev": str(crystal.induced),
         "net_cooper_coupling_mev": str(g),

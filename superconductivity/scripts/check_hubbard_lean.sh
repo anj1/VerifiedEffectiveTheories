@@ -14,5 +14,5 @@ printf '\nweakLeanArgs = ["-j1", "-s65536"]\n' >> "$config"
 for mask in 0 1 2 3 4 5 6 7; do
     lake -f "$config" build "Grain.HubbardData.Mask${mask}"
 done
-lake -f "$config" build Grain.HubbardBenchmark Grain.HubbardOperators
-lake -f "$config" env leanchecker Grain.HubbardBenchmark Grain.HubbardOperators
+lake -f "$config" build Grain.HubbardBenchmark Grain.HubbardOperators Grain.CooperBenchmark
+lake -f "$config" env leanchecker Grain.HubbardBenchmark Grain.HubbardOperators Grain.CooperBenchmark

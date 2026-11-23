@@ -14,6 +14,48 @@ theorem momentum_parameterization (k l p r : Momentum) :
 def occupied (a : State) (k : Momentum) (down : Bool) : Bool :=
   a.val.testBit (slot k down).val
 
+def totalMomentum (a : State) : Momentum :=
+  momenta.foldl (fun q k => if occupied a k false != occupied a k true then xor q k else q) 0
+
+def spinImbalance (a : State) : ℤ :=
+  (momenta.countP fun k => occupied a k false : ℤ) -
+    (momenta.countP fun k => occupied a k true : ℤ)
+
+def sameSector (a b : State) : Bool :=
+  totalMomentum a == totalMomentum b && spinImbalance a == spinImbalance b
+
+def preservesSector (ops : List (Bool × Slot)) (a : State) : Bool :=
+  match applyOps ops a with
+  | some (b, _) => sameSector a b
+  | none => true
+
+def retainedSector (a : State) : Bool :=
+  totalMomentum a == 0 && spinImbalance a == 0
+
+set_option maxRecDepth 10000 in
+set_option maxHeartbeats 0 in
+theorem scatter_preserves_sector (q k p : Momentum) (a : State) :
+    preservesSector (scatter q k p) a = true := by
+  revert a
+  fin_cases q <;> fin_cases k <;> fin_cases p <;> decide +kernel
+
+set_option maxRecDepth 10000 in
+theorem source_preserves_sector (create : Bool) (k : Momentum) (a : State) :
+    preservesSector (pairSource create k) a = true := by
+  revert a
+  cases create <;> fin_cases k <;> decide +kernel
+
+set_option maxRecDepth 10000 in
+theorem retained_sector_size : ((List.finRange 256).filter retainedSector).length = 22 := by
+  decide +kernel
+
+set_option maxRecDepth 10000 in
+set_option maxHeartbeats 0 in
+theorem scatter_survives_elimination (q k p : Momentum) :
+    ((List.finRange 256).filter retainedSector).any
+      (fun a => (applyOps (scatter q k p) a).isSome) = true := by
+  fin_cases q <;> fin_cases k <;> fin_cases p <;> decide +kernel
+
 def spinFlip (k : Momentum) (down : Bool) : List (Bool × Slot) :=
   [(false, slot k (!down)), (true, slot k down)]
 

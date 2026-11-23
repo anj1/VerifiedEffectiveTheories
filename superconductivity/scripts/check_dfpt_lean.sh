@@ -2,6 +2,11 @@
 set -euo pipefail
 cd "$(dirname "$0")/.."
 
+if (( $# > 1 )) || [[ ${1:-} != "" && ${1:-} != --prediction-only ]]; then
+  echo "usage: $0 [--prediction-only]" >&2
+  exit 2
+fi
+
 # A 14 GiB address-space limit leaves headroom for Lake under a 16 GB budget.
 ulimit -v 14680064
 ulimit -c 0
@@ -12,15 +17,23 @@ trap 'rm -f "$config"' EXIT
 cat lakefile.toml > "$config"
 printf '\nweakLeanArgs = ["-j2", "-s65536"]\n' >> "$config"
 
-lake -f "$config" build Grain.DFPTFive
-for case_index in 0 1 2 3; do
-  lake -f "$config" build "Grain.DFPTSeven.Case$case_index"
-done
-lake -f "$config" build Grain.DFPTSevenContrast
+lake -f "$config" build Grain.DFPTFivePrediction
+if [[ ${1:-} != --prediction-only ]]; then
+  lake -f "$config" build Grain.DFPTFive
+  for case_index in 0 1 2 3; do
+    lake -f "$config" build "Grain.DFPTSeven.Case$case_index"
+  done
+  lake -f "$config" build Grain.DFPTSevenContrast
+fi
+
 export LEAN_NUM_THREADS=1
-for module in SparseForm DFPTAssembly DFPTSector DFPTCertificate DFPTFive; do
+for module in SparseForm DFPTAssembly DFPTSector DFPTCertificate DFPTReduction DFPTShell DFPTFivePrediction; do
   lake -f "$config" env leanchecker -v "Grain.$module"
 done
+if [[ ${1:-} == --prediction-only ]]; then
+  exit 0
+fi
+lake -f "$config" env leanchecker -v Grain.DFPTFive
 for case_index in 0 1 2 3; do
   lake -f "$config" env leanchecker -v "Grain.DFPTSeven.Case$case_index"
 done

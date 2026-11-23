@@ -2,6 +2,7 @@
 """Compare four descriptions of the same four-site pair-source experiment."""
 import argparse
 from fractions import Fraction as Q
+from itertools import product
 import json
 from pathlib import Path
 
@@ -14,7 +15,22 @@ def difference(a, b, scale=1):
     return (a[0] - b[1]) / scale, (a[1] - b[0]) / scale
 
 
-def models(crystal):
+def pair_source_terms():
+    return [(Q(-1), operators) for k in range(4) for operators in
+            (((True, 2*k), (True, 2*k+1)), ((False, 2*k+1), (False, 2*k)))]
+
+
+def momentum_interactions(coupling, mask):
+    terms = []
+    for q, k, p in product(range(4), repeat=3):
+        channel = 0 if k == p else 1 if k ^ p == q else 2
+        if q == 0 or mask & (1 << channel):
+            terms.append((-coupling, ((True, 2*k), (True, 2*(q ^ k)+1),
+                                      (False, 2*(q ^ p)+1), (False, 2*p))))
+    return terms
+
+
+def site_models(crystal):
     states = range(256)
     diagonal = [(i, i, crystal.hopping[0] - crystal.induced/2 - crystal.chemical_potential)
                 for i in range(4)]
@@ -22,15 +38,14 @@ def models(crystal):
     local = [(-(crystal.induced - crystal.repulsion),
               ((True, 2*i), (True, 2*i+1), (False, 2*i+1), (False, 2*i)))
              for i in range(4)]
-    source = [(Q(-1), operators) for i in range(4) for operators in
-              (((True, 2*i), (True, 2*i+1)), ((False, 2*i+1), (False, 2*i)))]
-    cooper = [(-crystal.coupling,
-               ((True, 2*i), (True, 2*i+1), (False, 2*j+1), (False, 2*j)))
-              for i in range(4) for j in range(4)]
-    band = [(i, i, xi) for i, xi in enumerate(crystal.xi)]
     return (assemble(states, one_body(diagonal) + local),
-            assemble(states, one_body(hopping)), assemble(states, source),
-            assemble(states, one_body(band) + cooper))
+            assemble(states, one_body(hopping)), assemble(states, pair_source_terms()))
+
+
+def models(crystal):
+    band = [(i, i, xi) for i, xi in enumerate(crystal.xi)]
+    cooper = assemble(range(256), one_body(band) + momentum_interactions(crystal.coupling, 0))
+    return (*site_models(crystal), cooper)
 
 
 def shifted(diagonal, hopping, pair, hop_scale, source_scale):
@@ -40,22 +55,21 @@ def shifted(diagonal, hopping, pair, hop_scale, source_scale):
     return hamiltonian
 
 
-def quantum_free_energy(diagonal, hopping, pair, eta, induced, omega, temperature):
+def vacuum_overlaps(induced, omega):
     # After displacement every hopping/source term is an electronic
     # monomial times a unitary Weyl operator. Its vacuum expectation is
     # exp(-a) for a hop between two sites and exp(-2a) for an on-site pair.
     a = induced / (2*omega)
-    hop = exp_bounds(-a)
-    source = exp_bounds(-2*a)
-    hamiltonian = shifted(diagonal, hopping, pair, hop[0], eta*source[0])
-    ht = row_norm(hopping)
-    st = eta * row_norm(pair)
-    rounding = ht*(hop[1]-hop[0]) + st*(source[1]-source[0])
-    vacuum = free_energy(trace_bounds(hamiltonian, temperature), temperature)
+    return exp_bounds(-a), exp_bounds(-2*a)
+
+
+def quantum_enclosure(vacuum, diagonal_norm, hopping_norm, source_norm,
+                      hop, source, omega, temperature):
     # Each electronic transition has its own phonon displacement. The
     # triangle inequality row by row gives a block Schur norm bound.
-    b = ht*sqrt_bounds(1-hop[0]**2)[1] + st*sqrt_bounds(1-source[0]**2)[1]
-    v = row_norm(diagonal) + ht + st
+    b = (hopping_norm*sqrt_bounds(1-hop[0]**2)[1]
+         + source_norm*sqrt_bounds(1-source[0]**2)[1])
+    v = diagonal_norm + hopping_norm + source_norm
     # Use the gap above the top of the vacuum block where available.
     # Smaller omega still yields valid, potentially wide, bounds.
     gap = max(omega/2, omega - 2*v - temperature)
@@ -64,9 +78,20 @@ def quantum_free_energy(diagonal, hopping, pair, eta, induced, omega, temperatur
     tail = 1024 * exp_bounds((v+gap-omega)/temperature)[1] / (1-q)**4
     # Divide the upper trace by the certified vacuum trace before taking
     # logs. The partition function obeys Z <= exp(delta/t) Z_vac + tail.
-    vacuum_inverse = exp_bounds((vacuum[1]+rounding)/temperature)[1]
+    vacuum_inverse = exp_bounds(vacuum[1]/temperature)[1]
     ratio = exp_bounds(delta/temperature)[1] + tail * vacuum_inverse
-    return vacuum[0]-rounding-temperature*log_bounds(ratio)[1], vacuum[1]+rounding
+    return vacuum[0]-temperature*log_bounds(ratio)[1], vacuum[1]
+
+
+def quantum_free_energy(diagonal, hopping, pair, eta, induced, omega, temperature):
+    hop, source = vacuum_overlaps(induced, omega)
+    hamiltonian = shifted(diagonal, hopping, pair, hop[0], eta*source[0])
+    ht = row_norm(hopping)
+    st = eta * row_norm(pair)
+    rounding = ht*(hop[1]-hop[0]) + st*(source[1]-source[0])
+    low, high = free_energy(trace_bounds(hamiltonian, temperature), temperature)
+    return quantum_enclosure((low-rounding, high+rounding), row_norm(diagonal), ht, st,
+                             hop, source, omega, temperature)
 
 
 def susceptibility_bounds(levels, gap, temperature):
@@ -151,15 +176,24 @@ def report(crystal, temperatures, field, frequencies):
         # The number gauge rotation c -> i c makes F(-h) = F(h).
         response = {model: difference(value, energies[field][model], 2*field**2)
                     for model, value in energies[Q(0)].items()}
+        # Cost of dropping the negative square, using the minimizing pair
+        # field at each source. Only the change in this cost enters the response.
+        cost_zero = difference(energies[Q(0)]["bcs"], energies[Q(0)]["cooper"])
+        cost_source = difference(energies[field]["bcs"], energies[field]["cooper"])
+        cost_change = difference(cost_zero, cost_source)
         discrepancies = {
             "cooper_minus_hubbard": difference(response["cooper"], response["hubbard"]),
-            "bcs_minus_cooper": difference(response["bcs"], response["cooper"]),
+            "bcs_minus_cooper": tuple(endpoint / (2*field**2) for endpoint in cost_change),
             **{f"hubbard_minus_phonon_{omega}": difference(response["hubbard"], response[f"phonon_{omega}"])
                for omega in frequencies},
         }
         encode = lambda rows: {key: list(map(str, rounded_bounds(*value))) for key, value in rows.items()}
         experiments.append({"kbt_mev": str(t), "free_energy_at_zero_mev": encode(energies[Q(0)]),
                             "free_energy_at_source_mev": encode(energies[field]),
+                            "bcs_minus_cooper_free_energy_mev": encode({
+                                "zero": cost_zero, "source": cost_source,
+                                "zero_minus_source": cost_change,
+                            }),
                             "response_per_site_per_mev": encode(response),
                             "reductions_per_site_per_mev": encode(discrepancies)})
     return {"source_mev": str(field), "phonon_energies_mev": list(map(str, frequencies)),

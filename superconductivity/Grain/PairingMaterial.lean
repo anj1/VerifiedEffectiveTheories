@@ -9,6 +9,7 @@ namespace Grain.Pairing.Material
 structure Interval where
   lo : ℚ
   hi : ℚ
+  deriving DecidableEq
 
 namespace Interval
 
@@ -152,6 +153,7 @@ theorem weight_enclosure (h : ℚ) (hh : 0 < h) (samples : List Sample) (energie
 structure ModeBox where
   energy : Interval
   vertexSq : Interval
+  deriving DecidableEq
 
 structure RealMode where
   energy : ℝ
@@ -220,9 +222,12 @@ structure Realization (p : Type) where
   bands : p → List ℝ
   modes : p → p → List RealMode
   coulomb : p → p → ℝ
+  integratedDOS : Option (p → ℝ) := none
 
 def Mesh.matches (b : Mesh p) (r : Realization p) : Prop :=
-  (∀ i, sampled (b.bands i) (r.bands i)) ∧
+  (match r.integratedDOS with
+    | none => ∀ i, sampled (b.bands i) (r.bands i)
+    | some w => ∀ i, (weightBox b.halfWidth (b.bands i)).contains (w i)) ∧
   (∀ i j, List.Forall₂ ModeBox.matches (b.modes i j) (r.modes i j)) ∧
   (∀ i j, 0 ≤ (b.coulomb i j).lo ∧ (b.coulomb i j).contains (r.coulomb i j))
 
@@ -236,10 +241,22 @@ instance [Fintype p] (b : Mesh p) : Decidable (Mesh.valid b) := by
   unfold Mesh.valid
   infer_instance
 
+def Mesh.symmetric (b : Mesh p) : Prop :=
+  (∀ i j, b.modes i j = b.modes j i) ∧ (∀ i j, b.coulomb i j = b.coulomb j i)
+
+instance [Fintype p] (b : Mesh p) : Decidable b.symmetric := by
+  unfold Mesh.symmetric
+  infer_instance
+
 noncomputable def midpointRealization (b : Mesh p) : Realization p where
   bands i := (b.bands i).map fun s => (s.energy.mid : ℝ)
   modes i j := (b.modes i j).map fun m => ⟨m.energy.mid, m.vertexSq.mid⟩
   coulomb i j := (b.coulomb i j).mid
+
+theorem midpoint_symmetric (b : Mesh p) (h : b.symmetric) :
+    (∀ i j, (midpointRealization b).modes i j = (midpointRealization b).modes j i) ∧
+    (∀ i j, (midpointRealization b).coulomb i j = (midpointRealization b).coulomb j i) :=
+  ⟨fun i j => congrArg _ (h.1 i j), fun i j => congrArg (fun a : Interval => (a.mid : ℝ)) (h.2 i j)⟩
 
 theorem midpoint_realizes (b : Mesh p) (h : b.valid) : b.matches (midpointRealization b) := by
   have mid (a : Interval) (ha : a.lo ≤ a.hi) : a.contains (a.mid : ℝ) := by
@@ -263,7 +280,20 @@ theorem midpoint_realizes (b : Mesh p) (h : b.valid) : b.matches (midpointRealiz
 
 def dosBox (b : Mesh p) (i : p) : Interval := weightBox b.halfWidth (b.bands i)
 noncomputable def dos (b : Mesh p) (r : Realization p) (i : p) : ℝ :=
-  meshWeight b.halfWidth (b.bands i) (r.bands i)
+  match r.integratedDOS with
+  | none => meshWeight b.halfWidth (b.bands i) (r.bands i)
+  | some w => w i
+
+theorem dos_enclosure (b : Mesh p) (r : Realization p) (h : b.matches r)
+    (hw : 0 < b.halfWidth) (i : p) : (dosBox b i).contains (dos b r i) := by
+  have hbands := h.1
+  cases e : r.integratedDOS with
+  | none =>
+    simp only [e] at hbands
+    simpa only [dos, dosBox, e] using weight_enclosure _ hw _ _ (hbands i)
+  | some w =>
+    simp only [e] at hbands
+    simpa only [dos, dosBox, e] using hbands i
 
 def transferSq (t : ℚ) (n m : Fin N) : ℚ × ℚ :=
   let v := Pairing.transfers t n m
@@ -338,7 +368,7 @@ noncomputable def meshMetric [Fintype p] (b : Mesh p) (r : Realization p) (t : �
 theorem metric_enclosure [Fintype p] (b : Mesh p) (r : Realization p) (h : b.matches r)
     (hw : 0 < b.halfWidth) (hd : ∀ i, 0 < (dosBox b i).lo) (t : ℚ) (a : p × Fin N) :
     (metricBox b t a).contains (meshMetric b r t a) := by
-  have hwgt (i : p) : (dosBox b i).contains (dos b r i) := weight_enclosure _ hw _ _ (h.1 i)
+  have hwgt (i : p) : (dosBox b i).contains (dos b r i) := dos_enclosure b r h hw i
   unfold metricBox meshMetric
   simp only [realTransferSq_cast]
   apply Interval.div_contains _ (hd a.1) _ (hwgt a.1)

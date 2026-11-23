@@ -21,8 +21,33 @@ def sectorColumn (d : Input n c m) (modes : Fin m → List (OrbitalEntry n))
   if inSector N j then (instantaneousColumnWith d modes j).filter fun t => inSector N t.1
   else [(j,l)]
 
-private def sectorMatrix (d : Input n c m) (N : ℕ) (l : ℚ) (i j : State n) : ℚ :=
+def sectorMatrix (d : Input n c m) (N : ℕ) (l : ℚ) (i j : State n) : ℚ :=
   if inSector N i && inSector N j then instantaneous d i j else if i = j then l else 0
+
+theorem sectorColumn_entry (d : Input n c m)
+    (modes : Fin m → List (OrbitalEntry n)) (hm : ∀ k, modes k = modeEntries d k)
+    (N : ℕ) (l : ℚ) (i j : State n) :
+    entry (sectorColumn d modes N l j) i = sectorMatrix d N l i j := by
+  have hm' : modes = modeEntries d := funext hm
+  subst modes
+  unfold sectorColumn
+  rw [show instantaneousColumnWith d (modeEntries d) = instantaneousColumn d from rfl]
+  by_cases hij : i = j <;>
+    cases hi : inSector N i <;> cases hj : inSector N j <;>
+    simp_all [sectorMatrix, entry_filter]
+
+theorem sectorMatrix_symmetric (d : Input n c m) (h : Valid d) (N : ℕ) (l : ℚ)
+    (i j : State n) : sectorMatrix d N l i j = sectorMatrix d N l j i := by
+  simp [sectorMatrix, Bool.and_comm, instantaneous_symmetric d h i j, eq_comm (a := i) (b := j)]
+
+theorem sectorMatrix_form (d : Input n c m) (N : ℕ) (l : ℚ) (x : State n → ℝ)
+    (hx : supported N x) : form (sectorMatrix d N l) x = form (instantaneous d) x := by
+  unfold form
+  apply Finset.sum_congr rfl
+  intro i _
+  apply Finset.sum_congr rfl
+  intro j _
+  cases hi : inSector N i <;> cases hj : inSector N j <;> simp [sectorMatrix, hi, hj, hx i, hx j]
 
 theorem sector_lower (d : Input n c m) (h : Valid d)
     (modes : Fin m → List (OrbitalEntry n)) (hm : ∀ k, modes k = modeEntries d k)
@@ -31,27 +56,9 @@ theorem sector_lower (d : Input n c m) (h : Valid d)
     (rows : ∀ j, rowTest (subtractSquares (sectorColumn d modes N l) squares j) w l j)
     (x : State n → ℝ) (hx : supported N x) :
     (l : ℝ) * normSq x ≤ form (instantaneous d) x := by
-  have hm' : modes = modeEntries d := funext hm
-  subst modes
-  have he (i j : State n) : entry (sectorColumn d (modeEntries d) N l j) i =
-      sectorMatrix d N l i j := by
-    unfold sectorColumn
-    rw [show instantaneousColumnWith d (modeEntries d) = instantaneousColumn d from rfl]
-    by_cases hij : i = j <;>
-      cases hi : inSector N i <;> cases hj : inSector N j <;>
-      simp_all [sectorMatrix, entry_filter]
-  have hsym (i j : State n) : sectorMatrix d N l i j = sectorMatrix d N l j i := by
-    simp [sectorMatrix, Bool.and_comm, instantaneous_symmetric d h i j, eq_comm (a := i) (b := j)]
-  have hf : form (sectorMatrix d N l) x = form (instantaneous d) x := by
-    unfold form
-    apply Finset.sum_congr rfl
-    intro i _
-    apply Finset.sum_congr rfl
-    intro j _
-    cases hi : inSector N i <;> cases hj : inSector N j <;>
-      simp [sectorMatrix, hi, hj, hx i, hx j]
-  rw [← hf]
-  exact lower_with_squares _ _ squares w l he hsym hsquares rows x
+  rw [← sectorMatrix_form d N l x hx]
+  exact lower_with_squares _ _ squares w l (sectorColumn_entry d modes hm N l)
+    (sectorMatrix_symmetric d h N l) hsquares rows x
 
 noncomputable def electronicEnergies (d : Input n c m) (N : ℕ) : Set ℝ :=
   {e | ∃ x : State n → ℝ, supported N x ∧ 0 < normSq x ∧

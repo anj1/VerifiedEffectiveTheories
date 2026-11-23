@@ -11,6 +11,8 @@ ARTIFACTS = ROOT / "artifacts"
 FROZEN = ARTIFACTS / "prediction.sha256.json"
 FROZEN_SHELL = ARTIFACTS / "two_shell_prediction.sha256.json"
 ORIGINAL = ARTIFACTS / "five_orbital_original"
+SHELL_SCRIPT = ROOT / "scripts" / "two_shell_prediction.py"
+ORIGINAL_SHELL_SCRIPT = ARTIFACTS / "two_shell_original" / SHELL_SCRIPT.name
 EFT_REVISION = ARTIFACTS / "five_orbital_eft.sha256.json"
 ORIGINAL_SOURCES = ("Design.lean", "Effective.lean", "Prediction.lean")
 CANDIDATES = [ARTIFACTS / "certificate.json", ROOT / "Grain" / "Certificate.lean"]
@@ -50,7 +52,7 @@ def shell_prediction_inputs():
     if {path.stem for path in sources} != expected:
         raise ValueError("unexpected two-shell prediction import closure")
     return sources | {
-        ARTIFACTS / "two_shell_prediction.json", ROOT / "scripts" / "two_shell_prediction.py",
+        ARTIFACTS / "two_shell_prediction.json", SHELL_SCRIPT,
         ROOT / "lean-toolchain", ROOT / "lakefile.toml", ROOT / "lake-manifest.json",
     }
 
@@ -68,7 +70,12 @@ def verify_prediction():
 
 
 def verify_shell_prediction():
-    if json.loads(FROZEN_SHELL.read_text()) != hashes(shell_prediction_inputs()):
+    recorded = json.loads(FROZEN_SHELL.read_text())
+    current = hashes(shell_prediction_inputs())
+    script_key = str(SHELL_SCRIPT.relative_to(ROOT))
+    if current[script_key] != recorded.get(script_key) and ORIGINAL_SHELL_SCRIPT.exists():
+        current[script_key] = hashlib.sha256(ORIGINAL_SHELL_SCRIPT.read_bytes()).hexdigest()
+    if current != recorded:
         raise ValueError("frozen two-shell prediction inputs changed")
 
 

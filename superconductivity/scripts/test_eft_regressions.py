@@ -1,4 +1,4 @@
-"""Regression checks for the four-site and DFPT numerical enclosures."""
+"""Regression checks for the superconductivity effective models."""
 from decimal import Decimal, localcontext
 from fractions import Fraction as Q
 import json
@@ -7,17 +7,47 @@ from tempfile import TemporaryDirectory
 import unittest
 from unittest.mock import patch
 
+from certify import hamiltonian
 from crystal_bcs import read_crystal
 from dfpt_certificate import matrix_witness
 from dfpt_full_assembly import assemble_full_sector
+from dfpt_harmonic import pair_transfers
+from dfpt_shell_certificate import lean_source as shell_lean_source
 from dfpt_shell_eft import electronic_sector, exact_ground, parse_case, run
 from four_site_eft import mean_field_free_energy
+from two_shell_prediction import G, RADII, cubic_parity_matched_coupling
 
 
 ARTIFACTS = Path(__file__).resolve().parents[1] / "artifacts"
 
 
 class EFTRegressions(unittest.TestCase):
+    def test_two_shell_scalar_matches_each_parity_through_cubic_order(self):
+        def parity_coefficients(levels, odd):
+            sectors = []
+            for n in (odd - 1, odd, odd + 1):
+                kinetic = hamiltonian(levels, 0, n)
+                hop = hamiltonian(levels, 1, n)
+                head = min(range(len(kinetic)), key=lambda i: kinetic[i][i])
+                weights = {
+                    i: Q(1, kinetic[i][i] - kinetic[head][head])
+                    for i in range(len(kinetic)) if i != head and hop[head][i]
+                }
+                loops = sum(wi * wj for i, wi in weights.items() for j, wj in weights.items()
+                            if i != j and hop[i][j])
+                sectors.append((Q(hop[head][head] - kinetic[head][head]), -sum(weights.values()), -loops))
+            return tuple(o - (e + ne) / 2 for e, o, ne in zip(*sectors, strict=True))
+
+        linear, quadratic, cubic = parity_coefficients((-1, 0, 1), 3)
+        for r, s in RADII:
+            with self.subTest(r=r, s=s):
+                full_linear, full_quadratic, full_cubic = parity_coefficients((-s, -r, -1, 0, 1, r, s), 7)
+                self.assertEqual(full_linear, linear)
+                a = (full_quadratic - quadratic) / linear
+                b = (full_cubic - cubic - 2 * a * quadratic) / linear
+                for g in (G, G / 2):
+                    self.assertEqual(cubic_parity_matched_coupling(g, (r, s)), g + g**2 * a + g**3 * b)
+
     def test_signed_component_has_a_lower_bound_witness(self):
         case = parse_case(json.loads((ARTIFACTS / "dfpt_harmonic_example.json").read_text()))
         _, _, matrix = assemble_full_sector(case, 2)
@@ -71,6 +101,24 @@ class EFTRegressions(unittest.TestCase):
         case = parse_case(data)
         self.assertEqual(assemble_full_sector(case, 2), projected)
         self.assertEqual(electronic_sector(case, 2)[2], instantaneous)
+        self.assertEqual(pair_transfers(data)["transfers"], [{
+            "orbitals": [0, 1],
+            "screened_mev": "-1/3",
+            "phonon_mev": "-1/4",
+            "instantaneous_mev": "-7/12",
+            "modes": [{"index": 0, "mev": "-1/4"}],
+        }])
+
+    def test_shell_certificate_uses_only_reduction_witnesses(self):
+        path = ARTIFACTS / "dfpt_5_orbital_example.json"
+        frozen = json.loads((ARTIFACTS / "dfpt_5_orbital_prediction.json").read_text())
+        with (
+            patch("dfpt_shell_eft.assemble_full_sector", side_effect=AssertionError),
+            patch("dfpt_shell_eft.exact_ground", side_effect=AssertionError),
+        ):
+            certificate = shell_lean_source(path, frozen, "DFPTFive")
+        expected = ARTIFACTS.parent / "Grain" / "DFPTFivePrediction.lean"
+        self.assertEqual(certificate, expected.read_text())
 
     def test_edge_fillings_and_independent_validation(self):
         data = json.loads((ARTIFACTS / "dfpt_5_orbital_example.json").read_text())
