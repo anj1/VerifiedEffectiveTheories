@@ -5,47 +5,11 @@ namespace Grain.ParityMatching
 
 open ResolventRemainder
 
-private def size (c : Fin 3) : ℕ := if c = 1 then 7 else 6
-
-private def digits (code : ℕ) (i : Fin 3) : ℕ := code / 3^i.val % 3
-
-private def codes (c : Fin 3) :=
-  (List.range 27).filter fun code => (∑ i : Fin 3, digits code i) == 2 + c.val
-
-private theorem codes_length (c : Fin 3) : (codes c).length = size c := by
-  fin_cases c <;> decide +kernel
-
-private def occ (c : Fin 3) (j : Fin (size c)) :=
-  digits ((codes c)[j.val]'(by rw [codes_length]; exact j.isLt))
-
-private def transfer (a b : Fin 3 → ℕ) : Prop :=
-  ∃ i j : Fin 3, a i = 2 ∧ a j = 0 ∧
-    ∀ k : Fin 3, b k = (if k = i then 0 else if k = j then 2 else a k)
-
-private instance (a b : Fin 3 → ℕ) : Decidable (transfer a b) := by
-  unfold transfer
-  infer_instance
-
-def rationalStrength (r s : Bool) : ℚ :=
-  let x : ℚ := if r then 1/5 else 1/2
-  let y : ℚ := if s then 1/14 else 1/6
-  cubicMatchedCoupling (1/100) (x+y) (x^2+y^2)
-
-theorem strength_cast (r s : Bool) : (rationalStrength r s : ℝ) = strength r s := by
-  cases r <;> cases s <;>
-    norm_num [rationalStrength, cubicMatchedCoupling, strength, inverseInner, inverseOuter]
-
-def retainedH (r s : Bool) (c : Fin 3) (i j : Fin (size c)) : ℚ :=
-  let a := occ c i
-  let g := rationalStrength r s
-  if i = j then (a 2 : ℚ) - a 0 - g * (∑ k : Fin 3, if a k = 2 then 1 else 0)
-  else if transfer a (occ c j) then -g else 0
-
 private structure Witness (c : Fin 3) where
   lo : ℚ
   hi : ℚ
-  weight : Fin (size c) → ℚ
-  trial : Fin (size c) → ℚ
+  weight : Fin (retainedSize c) → ℚ
+  trial : Fin (retainedSize c) → ℚ
 
 private def witness : (r s : Bool) → (c : Fin 3) → Witness c
   | false, false, 0 => ⟨-201014323376246507/100000000000000000, -25126790422030813/12500000000000000, ![1000000000000000000000000, 1, 5046025373763826664670, 1, 1, 2529394380995292278688], ![1000000000000000000000000, 0, 5046025373763826664670, 0, 0, 2529394380995292278688]⟩
@@ -60,9 +24,6 @@ private def witness : (r s : Bool) → (c : Fin 3) → Witness c
   | true, true, 0 => ⟨-20101028530484119/10000000000000000, -201010285304841187/100000000000000000, ![1000000000000000000000000, 1, 5026037863231956697078, 1, 1, 2519350106128046854512], ![1000000000000000000000000, 0, 5026037863231956697078, 0, 0, 2519350106128046854512]⟩
   | true, true, 1 => ⟨-25125654124705167/12500000000000000, -201005232997641333/100000000000000000, ![1000000000000000000000000, 1, 1, 1, 1, 1, 2506782742277202797027], ![1000000000000000000000000, 0, 0, 0, 0, 0, 2506782742277202797027]⟩
   | true, true, 2 => ⟨-101006502351400187/50000000000000000, -202013004702800371/100000000000000000, ![1000000000000000000000000, 1, 1, 5026037863231958313361, 1, 2519350106128047666731], ![1000000000000000000000000, 0, 0, 5026037863231958313361, 0, 2519350106128047666731]⟩
-
-noncomputable def retainedParity (r s : Bool) : ℝ :=
-  ground (retainedH r s 1) - (ground (retainedH r s 0) + ground (retainedH r s 2)) / 2
 
 private def Valid (r s : Bool) (c : Fin 3) : Prop :=
   let A := retainedH r s c
@@ -100,19 +61,9 @@ private theorem parity (r s : Bool) :
   unfold retainedParity
   constructor <;> linarith
 
-theorem retained_benchmark_polynomial_error (r s : Bool) :
-    |retainedParity r s - retainedPolynomial r s| ≤
-      2 * budget 2 (strength r s) 2 2 := by
-  obtain ⟨hl, hu⟩ := parity r s
-  rw [abs_le]
-  cases r <;> cases s <;>
-    norm_num [parityLo, parityHi, witness, retainedPolynomial, strength,
-      inverseInner, inverseOuter, budget] at hl hu ⊢ <;>
-    constructor <;> linarith
-
-theorem benchmark_analytic_error :
-    |TwoShell.Prediction.mixedContrast - mixed retainedParity| ≤ 204 / 10^7 :=
-  benchmark_scalar_error_of_retained retainedParity retained_benchmark_polynomial_error
+/-- The analytic budget and the nested-reduction certificate use the same full matrix. -/
+theorem fullParity_eq_prediction (r s : Bool) :
+    fullParity r s = TwoShell.Prediction.parityEnergy r s := rfl
 
 /-- The frozen nested reduction and the scalar control already resolve the
 signed discrepancy before using the independent full solve. -/

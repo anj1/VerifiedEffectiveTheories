@@ -9,6 +9,8 @@ import Grain.PairingExample
 import Grain.PairingMaterialExample
 import Grain.PairingFullExample
 import Grain.PairingParent
+import Grain.PairingClosureExample
+import Grain.PairingParentResponseExample
 import Grain.PairingBandMesh
 import Grain.PairingProjection
 import Grain.MgB2

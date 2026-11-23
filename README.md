@@ -89,10 +89,15 @@ Mode-resolved data identify the boron bond-stretching doublet at the A point.
 [MgB₂ calculation](superconductivity/README.md#which-couplings-dominate-in-mgb2)
 
 The pairing workflow derives the retarded exchange coefficient from the
-harmonic parent and certifies a synthetic Eliashberg crossing with all
-Matsubara frequencies included. It also checks Fermi-window quadrature
-when the electronic calculation supplies cellwise band-energy bounds.
-[Electronic structure to pairing](superconductivity/README.md#electronic-structure-to-pairing-eigenvalue)
+harmonic parent and certifies an all-frequency crossing of a synthetic
+Eliashberg pencil. The first-order comparison with the parent exceeds the
+certificate's error budget. Time-local screening contributes beyond the imposed
+frequency cutoff, and the finite-band one-phonon normal term changes one
+diagonal entry by at least 37.5% at the hot endpoint, where the certificate
+allows about 2.4%. The exact static pair susceptibility of a finite
+harmonic parent stays bounded at every positive temperature, with all
+oscillator levels included.
+[Harmonic exchange and the crossing certificate](superconductivity/README.md#harmonic-parent-and-the-all-frequency-crossing)
 
 ## Verify atomcrystal
 

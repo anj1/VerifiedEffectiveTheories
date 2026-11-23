@@ -90,6 +90,13 @@ def audit():
     shell_sources = closure("Grain.ShellFullData")
     if {path.stem for path in shell_sources} != {"Energy", "Schur", "TwoShell", "ShellCertificate", "ShellFullData"}:
         raise ValueError("unexpected two-shell full-solve certificate import closure")
+    scalar_sources = closure("Grain.ScalarError")
+    expected_scalar_sources = {"Energy", "Model", "Design", "RankOne", "Effective", "Prediction",
+                               "ParityCancellation", "ParityMatching", "Schur", "TwoShell",
+                               "ShellCertificate", "ResolventRemainder", "GroundResolvent",
+                               "ScalarOccupation", "ScalarError"}
+    if {path.stem for path in scalar_sources} != expected_scalar_sources:
+        raise ValueError("unexpected analytic scalar budget import closure")
     for path in (ROOT / "Grain").glob("*.lean"):
         if re.search(r"\b(sorry|admit|axiom|native_decide)\b|\+native", path.read_text()):
             raise ValueError(f"proof shortcut found in {path.name}")

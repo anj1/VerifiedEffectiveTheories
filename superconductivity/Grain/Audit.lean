@@ -6,6 +6,8 @@ import Grain.PairingExample
 import Grain.PairingMaterialExample
 import Grain.PairingFullExample
 import Grain.PairingParent
+import Grain.PairingClosureExample
+import Grain.PairingParentResponseExample
 import Grain.PairingBandMesh
 import Grain.PairingProjection
 import Grain.MgB2
@@ -38,12 +40,19 @@ import Grain.HubbardOperators
 #print axioms Grain.ParityMatching.benchmark_loop_parity
 #print axioms Grain.ParityMatching.benchmark_cubic_mixed
 #print axioms Grain.ParityMatching.cubic_coefficient_match_iff
+#print axioms Grain.ParityMatching.reciprocal_cubic_parity_error
+#print axioms Grain.ParityMatching.reciprocal_cubic_error_mixed
 #print axioms Grain.ParityMatching.cubic_match_remainder
 #print axioms Grain.ResolventRemainder.normalize_eigenvector
 #print axioms Grain.ResolventRemainder.sector_remainder
 #print axioms Grain.ResolventRemainder.eigenvalue_remainder
 #print axioms Grain.ResolventRemainder.parity_error
 #print axioms Grain.ResolventRemainder.cubic_loop_expansion
+#print axioms Grain.ResolventRemainder.ground_remainder
+#print axioms Grain.ParityMatching.full_sector_polynomial_error
+#print axioms Grain.ParityMatching.retained_sector_polynomial_error
+#print axioms Grain.ParityMatching.full_benchmark_polynomial_error
+#print axioms Grain.ParityMatching.retained_benchmark_polynomial_error
 #print axioms Grain.ParityMatching.benchmark_analytic_error
 #print axioms Grain.ParityMatching.benchmark_reduced_error
 #print axioms Grain.ParityMatching.benchmark_sharp_error
@@ -92,6 +101,25 @@ import Grain.HubbardOperators
 #print axioms Grain.Pairing.Material.AllFrequencyCertificate.crossing
 #print axioms Grain.Pairing.Material.AllFrequencyCertificate.midpoint_crossing
 #print axioms Grain.Pairing.Material.crossing_of_threshold_budget
+#print axioms Grain.Pairing.Material.instantaneous_screening_form
+#print axioms Grain.Pairing.Material.parent_exchange_cutoff_error
+#print axioms Grain.Pairing.Material.instantaneous_tail_row_lower
+#print axioms Grain.Pairing.Material.add_split_pair_density_valid
+#print axioms Grain.Pairing.Material.add_split_pair_density_projection
+#print axioms Grain.Pairing.Material.add_split_pair_density_entry
+#print axioms Grain.Pairing.Material.bare_normal_propagator
+#print axioms Grain.Pairing.Material.finite_band_normal_fold_zero
+#print axioms Grain.Pairing.Material.finite_band_normal_sum
+#print axioms Grain.Pairing.Material.AllFrequencyCertificate.screening_exceeds_endpoint_rows
+#print axioms Grain.Pairing.Material.AllFrequencyCertificate.hot_screening_exceeds_form_budget
+#print axioms Grain.Pairing.Material.AllFrequencyCertificate.hot_finite_band_normal_error
+#print axioms Grain.HarmonicBand.harmonic_oscillator_comparison
+#print axioms Grain.Pairing.ParentResponse.harmonic_gibbs_summable
+#print axioms Grain.Pairing.ParentResponse.susceptibility_bounds
+#print axioms Grain.Pairing.ParentResponse.inverse_susceptibility_lower
+#print axioms Grain.Pairing.ParentResponse.harmonic_inverse_response_lower
+#print axioms Grain.Pairing.ParentResponse.exact_pair_response
+#print axioms Grain.Pairing.ParentResponse.exact_pair_response_changes
 #print axioms Grain.Pairing.Attribution.phonon_zero
 #print axioms Grain.Pairing.Attribution.static_mode_from_derivative
 #print axioms Grain.Pairing.Attribution.MgB2.sensitivity_box

@@ -1,6 +1,6 @@
-import Grain.ParityMatching
-import Grain.ResolventRemainder
-import Grain.ShellPrediction
+import Grain.ScalarOccupation
+
+/-! The scalar parity budget from the occupation Hamiltonians. -/
 
 namespace Grain.ParityMatching
 
@@ -23,6 +23,10 @@ noncomputable def retainedPolynomial (r s : Bool) : ℝ :=
   let k := strength r s
   k/2 + k^2/2 + k^3/4
 
+theorem strength_cast (r s : Bool) : (rationalStrength r s : ℝ) = strength r s := by
+  cases r <;> cases s <;>
+    norm_num [rationalStrength, cubicMatchedCoupling, strength, inverseInner, inverseOuter]
+
 /-- Uniform evaluation of the sector budgets and matching error in spacing units. -/
 theorem benchmark_budget (r s : Bool) :
     0 < strength r s ∧
@@ -36,25 +40,46 @@ theorem benchmark_budget (r s : Bool) :
 noncomputable def mixed (p : Bool → Bool → ℝ) : ℝ :=
   p false false - p false true - p true false + p true true
 
+set_option maxRecDepth 10000 in
 set_option maxHeartbeats 0 in
+private theorem full_polynomial_value (r s : Bool) :
+    (polynomialParity (fullSectorPolynomial r s) : ℝ) = fullPolynomial r s := by
+  have h (r s : Bool) :
+      polynomialParity (fullSectorPolynomial r s) =
+        let a : ℚ := (if r then 1/5 else 1/2) + (if s then 1/14 else 1/6)
+        let q : ℚ := (if r then 1/5 else 1/2)^2 + (if s then 1/14 else 1/6)^2
+        1/200 + (1/100)^2 * (1+a)/2 + (1/100)^3 * ((1+a)^2/2 - (1+q)/4) := by
+    cases r <;> cases s <;> decide +kernel
+  rw [h]
+  cases r <;> cases s <;> norm_num [fullPolynomial, inverseInner, inverseOuter]
+
+private theorem retained_polynomial_value (r s : Bool) :
+    (polynomialParity (retainedSectorPolynomial r s) : ℝ) = retainedPolynomial r s := by
+  have h (r s : Bool) :
+      polynomialParity (retainedSectorPolynomial r s) =
+        let k := rationalStrength r s
+        k/2 + k^2/2 + k^3/4 := by
+    cases r <;> cases s <;> decide +kernel
+  rw [h]
+  push_cast
+  rw [strength_cast]
+  rfl
+
 theorem full_benchmark_polynomial_error (r s : Bool) :
-    |TwoShell.Prediction.parityEnergy r s - fullPolynomial r s| ≤
-      2 * budget 2 (1 / 100) 12 12 := by
-  have h₀ := abs_le.mp (TwoShell.Prediction.sector_error r s 0)
-  have h₁ := abs_le.mp (TwoShell.Prediction.sector_error r s 1)
-  have h₂ := abs_le.mp (TwoShell.Prediction.sector_error r s 2)
-  rw [abs_le]
-  cases r <;> cases s <;>
-    norm_num [TwoShell.Prediction.parityEnergy,
-      TwoShell.Prediction.center, TwoShell.Prediction.prediction,
-      TwoShell.Prediction.r2s6n6Center, TwoShell.Prediction.r2s6n7Center, TwoShell.Prediction.r2s6n8Center,
-      TwoShell.Prediction.r2s14n6Center, TwoShell.Prediction.r2s14n7Center, TwoShell.Prediction.r2s14n8Center,
-      TwoShell.Prediction.r5s6n6Center, TwoShell.Prediction.r5s6n7Center, TwoShell.Prediction.r5s6n8Center,
-      TwoShell.Prediction.r5s14n6Center, TwoShell.Prediction.r5s14n7Center, TwoShell.Prediction.r5s14n8Center,
-      TwoShell.Prediction.sectorTolerance, fullPolynomial,
-      inverseInner, inverseOuter, budget] at h₀ h₁ h₂ ⊢ <;>
-    obtain ⟨_, _⟩ := h₀ <;> obtain ⟨_, _⟩ := h₁ <;> obtain ⟨_, _⟩ := h₂ <;>
-    constructor <;> linarith
+    |fullParity r s - fullPolynomial r s| ≤ 2 * budget 2 (1 / 100) 12 12 := by
+  rw [← full_polynomial_value]
+  simpa only [fullParity, polynomialParity, Rat.cast_sub, Rat.cast_add,
+    Rat.cast_div, Rat.cast_ofNat] using
+    parity_error (fullEnergy r s) (fun c => (fullSectorPolynomial r s c : ℝ))
+      (full_sector_polynomial_error r s)
+
+theorem retained_benchmark_polynomial_error (r s : Bool) :
+    |retainedParity r s - retainedPolynomial r s| ≤ 2 * budget 2 (strength r s) 2 2 := by
+  rw [← retained_polynomial_value, ← strength_cast]
+  simpa only [retainedParity, polynomialParity, Rat.cast_sub, Rat.cast_add,
+    Rat.cast_div, Rat.cast_ofNat] using
+    parity_error (fun c => ground (retainedH r s c)) (fun c => (retainedSectorPolynomial r s c : ℝ))
+      (retained_sector_polynomial_error r s)
 
 /-- Propagate the two models' sector-derived parity bounds through the mixed contrast. -/
 theorem benchmark_scalar_error (full retained : Bool → Bool → ℝ)
@@ -74,12 +99,14 @@ theorem benchmark_scalar_error (full retained : Bool → Bool → ℝ)
   unfold mixed
   exact abs_le.mpr ⟨by linarith, by linarith⟩
 
-/-- The full-model premise follows from the certified nested reduction. -/
 theorem benchmark_scalar_error_of_retained (retained : Bool → Bool → ℝ)
     (hr : ∀ r s, |retained r s - retainedPolynomial r s| ≤
       2 * budget 2 (strength r s) 2 2) :
-    |TwoShell.Prediction.mixedContrast - mixed retained| ≤ 204 / 10^7 :=
-  benchmark_scalar_error TwoShell.Prediction.parityEnergy retained
-    full_benchmark_polynomial_error hr
+    |mixed fullParity - mixed retained| ≤ 204 / 10^7 :=
+  benchmark_scalar_error fullParity retained full_benchmark_polynomial_error hr
+
+theorem benchmark_analytic_error :
+    |mixed fullParity - mixed retainedParity| ≤ 204 / 10^7 :=
+  benchmark_scalar_error_of_retained retainedParity retained_benchmark_polynomial_error
 
 end Grain.ParityMatching

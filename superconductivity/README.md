@@ -174,6 +174,12 @@ This gives an end-to-end error bound for the composed reduction.
 
 ### Scalar matching through cubic order
 
+Exact shell elimination produces the energy-dependent matrix
+\(H_{\mathrm{eff}}(z)\). The scalar model restricts the retained
+Hamiltonian to the original three-orbital form with one adjustable
+coupling. The matching condition concerns the odd–even ground-energy
+difference.
+
 The second-order hop cancellation gives \(g^2/(2r)\) in parity for a
 shell at \(\pm r\). Bare central-orbital parity is \(g/2\). Matching
 these energies gives a coupling shift of \(g^2/r\) per removed shell.
@@ -247,21 +253,26 @@ g^4 VY\bigl[BW+VY(U+gW)\bigr].
 \]
 [Eigenvector normalization and resolvent remainder](Grain/ResolventRemainder.lean)
 
-In spacing units the reference block has \(\Delta=2\). Each pair transfer
-moves two electrons across at least one spacing. The seven-orbital blocks
-have at most \(3\cdot4=12\) hops per row, and the three-orbital blocks
-have at most two. The ground state lies in the reference block. Other
-blocked configurations cost at least one spacing in kinetic energy, have
-at most the reference pair count, and have absolute off-diagonal row sums
-bounded by \(12g\) in the full model or \(2g_{\mathrm{eff}}\) in the scalar model.
-These row bounds place their eigenvalues above the reference diagonal,
-which itself bounds the ground energy from above. The benchmark
-substitution gives sector error bounds of \(2.52\times10^{-6}d\) and
-\(1.6\times10^{-8}d\), respectively. Including the polynomial matching
-remainder gives a conservative analytic mixed-contrast error bound of
-\(2.04\times10^{-5}d\). Lean also checks this budget directly against the
-certified sector enclosures. The scalar checker reconstructs the three-orbital
-Hamiltonians on all occupations and checks rational ground-energy witnesses.
+Lean checks a gap of \(\Delta=2\) in spacing units and hop bounds of
+\(B,V\le12\) for the seven-orbital model and \(B,V\le2\) for the
+three-orbital model by exact enumeration of occupations. Pair transfers preserve singly occupied
+sites. Strict row bounds put the other invariant blocks above the
+reference diagonal, and the reference occupation gives a variational
+upper bound on the ground energy. The ground-state eigenvector therefore
+has a component in the reference block, where the resolvent estimate
+applies. Lean also evaluates the two-hop and three-hop sums from the
+occupation entries and identifies their parity polynomials.
+[Ground-state reduction](Grain/GroundResolvent.lean) · [Occupation checks](Grain/ScalarOccupation.lean)
+
+The resulting sector error bounds are \(2.52\times10^{-6}d\) and
+\(1.6\times10^{-8}d\). Including the polynomial matching remainder gives
+a conservative analytic mixed-contrast error bound of
+\(2.04\times10^{-5}d\). Its proof imports the Hamiltonian definitions and
+generic bounds and can be checked independently of the numerical
+sector witnesses.
+
+The scalar checker also checks rational ground-energy witnesses for
+the three-orbital Hamiltonians.
 Combining these with the frozen nested reduction bounds the signed difference
 (full minus scalar) in \([2.025,\,2.030]\times10^{-10}d\). The independent
 full solve sharpens this to \([2.027478,\,2.027483]\times10^{-10}d\).
@@ -661,16 +672,144 @@ whose status is unresolved contribute quadrature uncertainty. Lean can
 feed these integrated DOS values into the same pairing certificate.
 [Cellwise band-mesh proof](Grain/PairingBandMesh.lean)
 
-A material claim requires certified cell masses and band-energy
-enclosures, projected phonon and screening data, and a parent-derived
-bound on the vertex, material-specific bandwidth, patch projection,
-and screening corrections to the normal and pairing response. Lean checks how
-interaction row errors and normal-state diagonal errors consume the
-endpoint margins of a finite pencil. The synthetic input supplies no
-many-body residual or thermodynamic-limit result identifying the
-spectral crossing with a bulk phase transition.
-[Threshold error transfer](Grain/PairingProjection.lean) ·
-[Anisotropic Eliashberg formalism](https://arxiv.org/abs/1211.3345)
+#### Comparison with the parent
+
+The threshold transfer measures errors in \(F-D\) in units of the
+reference metric \(D\). The certified margins are \(0.0849695\) at
+\(\tau=3\) meV and \(0.0239981\) at \(\tau=12\) meV.
+[Threshold error transfer](Grain/PairingProjection.lean)
+
+- **Screened interaction.** The parent's screened operator is time-local.
+  In the even-frequency Cooper channel its form evaluates each pair
+  field at equal time, which sums its frequency coefficients. This gives
+  \(-2C_{ij}\) for every positive-frequency column after folding. The
+  example applies this term only when both frequency indices are below
+  two. For every realization in the input intervals, the single omitted
+  entry joining \((i,n)=(0,0)\) to \((j,m)=(0,2)\) has magnitude at least
+  \(259.8\). The corresponding row allowances are below \(196\) and
+  \(56\) at the cold and hot endpoints, respectively. Extra frequencies
+  add the same error per column on that patch. At the hot endpoint two
+  trials with opposite relative signs also show that the shifted form
+  exceeds a 5% error allowance for any choice of normal diagonal.
+  [Parent exchange and tail proof](Grain/PairingClosure.lean) ·
+  [Endpoint comparison](Grain/PairingClosureExample.lean)
+- **Finite band.** Interpreting the input energies and quadrature weights
+  as a finite electronic spectral measure gives the bare radial factor
+  \(\pi^{-1}\sum_\ell q_\ell\omega/(\omega^2+\xi_\ell^2)\). Its upper
+  bound is the total patch weight divided by \(\pi\omega\).
+  At the hot endpoint this is at most one third of the flat-DOS weight
+  on both patches at every internal frequency. At the first positive
+  external frequency every folded phonon difference is nonnegative.
+  Summing the convergent one-phonon term with the finite-band factor,
+  in the same metric convention, gives a diagonal discrepancy of at
+  least \(37.5\%\) on patch zero. The bound uses the original sample
+  weights and applies throughout the supplied energy intervals.
+  [Normal propagator and sum proof](Grain/PairingClosure.lean) ·
+  [Numerical comparison](Grain/PairingClosureExample.lean)
+- **Pair projection.** In a two-orbital harmonic parent, adding
+  \(u\,n_{0\uparrow}n_{1\downarrow}\) shifts the energy of a split pair
+  by \(u\) and preserves all same-orbital Cooper matrix elements, band
+  levels and phonon inputs. Thus the projected inputs leave even the
+  size of this discarded electronic term undetermined.
+  [Projection calculation](Grain/PairingClosure.lean)
+
+These comparisons rule out transferring the existing endpoint
+certificate by treating the bandwidth and screening replacements as
+small errors. The first-order comparison uses the same exchange data
+on both sides and a finite-band bare propagator.
+[Full-bandwidth Eliashberg equations](https://www.nature.com/articles/s42005-024-01528-6)
+
+~~~sh
+lake build Grain.PairingClosureExample
+lake env leanchecker Grain.PairingClosure Grain.PairingClosureExample
+~~~
+
+#### Exact finite-parent pairing response
+
+For a specified finite parent, the equilibrium instability test is a
+pole of the static susceptibility to an orbital pair source. Let \(H\)
+include the chemical potential and let \(A\) be a real Hermitian source
+that adds or removes a pair. At zero source \(H\) preserves fermion
+number, so the mean of \(A\) vanishes. Write \(E_i\) for the exact energies,
+\(A_{ij}\) for the matrix of the source in an energy eigenbasis, and
+\(\beta=\pi/\tau\). The susceptibility of \(H-\eta A\) at \(\eta=0\) is
+the second derivative of the negative free energy. The Duhamel series
+for the partition trace can be differentiated at zero source. Trace
+Hölder bounds its order-\(k\) coefficient by
+\(Z(\beta)(\beta\|A\|)^k/k!\). Inserting the eigenbasis in the second
+derivative gives the Lehmann sum
+\[
+\chi_A=\frac{\beta}{Z}\sum_{ij}|A_{ij}|^2
+   \int_0^1 e^{-\beta[(1-s)E_i+sE_j]}\,ds,\qquad
+Z=\sum_i e^{-\beta E_i}.
+\]
+The integral is bounded by the mean of the two Boltzmann weights by
+convexity of the exponential. Symmetry of \(A\) combines the two terms
+into a row sum of squared source entries. Bessel's inequality bounds
+each such row by \(\|A\|^2\), giving \(0\le\chi_A\le\beta\|A\|^2\).
+The proof applies to the countable sum, including transitions with
+degenerate energies. If \(A\) is nonzero, at least one transition has
+positive weight and \(\chi_A>0\).
+[Lean response bounds](Grain/PairingParentResponse.lean) ·
+[Duhamel response](https://web.ma.utexas.edu/mp_arc/c/14/14-47.pdf)
+
+To check the trace condition for the harmonic Hamiltonian, let \(q_0\)
+be the free oscillator form and \(q_H\) the full form. Completing each
+linear oscillator term with half the corresponding free form bounds
+\(\lvert q_H-q_0\rvert\) by \(q_0/2+C\|\psi\|^2\). The constant \(C\)
+can be taken as the norm of the electronic matrix plus
+\(\sum_k\|D_k\|^2/K_k\), where \(D_k\) is the electronic deformation
+operator. The bound holds on every occupation box. In the uncut
+space the shifted form norm is equivalent to the free oscillator
+form norm. The free form-domain unit ball has uniformly vanishing
+occupation tails because the oscillator frequencies are positive
+and there are finitely many electronic states and modes. Its embedding
+into the Hilbert space is compact. The closed-form representation
+and min–max principles therefore give a discrete spectrum with
+\(E_\ell\ge E^0_\ell/2-C\) in increasing order with multiplicity.
+The free Boltzmann series at \(\beta/2\) is a finite product of
+convergent geometric series. Lean checks the form comparison and
+the summability implication from the eigenvalue inequality.
+[Oscillator form comparison](Grain/PairingParentResponse.lean) ·
+[Boltzmann summability](Grain/PairingParentResponse.lean)
+
+For \(n\) orbitals and a unit real vector \(a\) of source coefficients,
+take \(A=\sum_i a_i(c^\dagger_{i\uparrow}c^\dagger_{i\downarrow}
++c_{i\downarrow}c_{i\uparrow})\). Each single-orbital source exchanges the
+empty and doubly occupied states with unit magnitude, so
+\(\|A\|\le\sum_i|a_i|\le\sqrt n\). A nonzero \(a\) creates a nonzero
+pair from the vacuum. Hence the exact susceptibility matrix is positive
+definite and its inverse has smallest eigenvalue at least
+\(\tau/(\pi n)\). Throughout the synthetic certificate's interval this
+is at least \(3/(\pi n)\) meV. For the explicit two-orbital harmonic
+export this gives \(3/(2\pi)\) meV. Thus a finite harmonic parent has no
+static pairing instability on that interval, or at any positive
+temperature. A transfer that identified the synthetic crossing with a
+static instability of the finite parent would contradict this bound.
+[Inverse response bound](Grain/PairingParentResponse.lean) ·
+[Two-orbital harmonic export](Grain/HarmonicBandExample.lean)
+
+Projected inputs also fail to determine the finite value of the exact
+response. Two valid two-orbital parents with identical projected
+realizations differ by the split-pair density term of strength \(u\).
+For the source that connects the vacuum to the first same-orbital
+pair with the spectator orbital empty, the exact susceptibility is
+\(2\beta/(12+4e^{-\beta u})\). The numerator comes from the two
+directed transitions and the denominator from all sixteen electronic
+states. It changes for every \(u>0\) even though the entire projected
+realization agrees with the \(u=0\) parent.
+[Exact response counterexample](Grain/PairingParentResponseExample.lean)
+
+A bulk instability would require a specified thermodynamic family of
+microscopic Hamiltonians and control of the susceptibility in that limit.
+The finite-volume lower bound scales as \(1/n\). The supplied patch
+intervals give neither that family nor its discarded interactions.
+
+~~~sh
+lake build Grain.PairingParentResponseExample
+lake env leanchecker Grain.HarmonicBand Grain.PairingParentResponse \
+  Grain.PairingParentResponseExample
+~~~
 
 ## A periodic site model to BCS predictions
 
@@ -1244,7 +1383,7 @@ bash scripts/check_hubbard_lean.sh
 lake build
 lake env leanchecker Grain.Main
 lake env leanchecker Grain.ParityMatching
-lake env leanchecker Grain.ResolventRemainder Grain.ScalarError Grain.ScalarCertificate
+lake env leanchecker Grain.ResolventRemainder Grain.GroundResolvent Grain.ScalarOccupation Grain.ScalarError Grain.ScalarCertificate
 lake env leanchecker Grain.ShellValidation
 lake env leanchecker Grain.PhononBridge
 lake env leanchecker Grain.PhononGround

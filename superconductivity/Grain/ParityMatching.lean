@@ -239,6 +239,19 @@ theorem cubic_coefficient_match_iff (u a q b : ℚ) :
       b = a ^ 2 - q / 2 := by
   constructor <;> intro h <;> linarith [mul_comm u a]
 
+/-- The reciprocal completion uses `b = a²`, which shifts the cubic parity
+coefficient by the sum of squared inverse shell radii divided by four. -/
+theorem reciprocal_cubic_parity_error (u a q : ℚ) :
+    (a ^ 2 / 2 + a * u + u ^ 2 / 4) -
+      ((u + a) ^ 2 / 2 - (u ^ 2 + q) / 4) = q / 4 := by
+  ring
+
+/-- The reciprocal coefficient error is invisible to the mixed contrast. -/
+theorem reciprocal_cubic_error_mixed (x₁ x₂ y₁ y₂ : ℚ) :
+    (x₁ ^ 2 + y₁ ^ 2) / 4 - (x₁ ^ 2 + y₂ ^ 2) / 4 -
+      (x₂ ^ 2 + y₁ ^ 2) / 4 + (x₂ ^ 2 + y₂ ^ 2) / 4 = 0 := by
+  ring
+
 /-- Substitution into the retained parity polynomial matches the full parity through cubic
 order. The difference is a multiple of `g⁴`. Here `u = 1/d`, `a = 1/r + 1/s`, and
 `q = 1/r² + 1/s²`. -/
